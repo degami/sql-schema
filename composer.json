@@ -13,10 +13,9 @@
 		"php": ">=5.3.0"
 	},
 	"autoload": {
-		"classmap": ["src/"]
-	},
-    "psr-4": {
-      "Degami\\SqlSchema\\": "src",
-      "Degami\\SqlSchema\\Exceptions": "src/exceptions"
-    }
+	    "psr-4": {
+	      "Degami\\SqlSchema\\": "src",
+	      "Degami\\SqlSchema\\Exceptions": "src/exceptions"
+	    }
+	}
 }
