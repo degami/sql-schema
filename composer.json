@@ -16,7 +16,7 @@
 		"files": [],
 	    "psr-4": {
 	      "Degami\\SqlSchema\\": "src",
-	      "Degami\\SqlSchema\\Exceptions": "src/exceptions"
+	      "Degami\\SqlSchema\\Exceptions\\": "src/exceptions"
 	    }
 	}
 }
