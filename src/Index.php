@@ -1,8 +1,8 @@
 <?php
 
-namespace CzProject\SqlSchema;
+namespace Degami\SqlSchema;
 
-use CzProject\SqlSchema\Exceptions\OutOfRangeException;
+use Degami\SqlSchema\Exceptions\OutOfRangeException;
 
 class Index
 {
@@ -95,5 +95,21 @@ class Index
     public function getColumns()
     {
         return $this->columns;
+    }
+
+    /**
+     * @return string
+     */
+    public function render()
+    {
+        $output = $index->getType() ;
+        $output .= ' ' . ($this->getType() == 'PRIMARY' ? ' KEY' : '') ;
+        $output .= ' ' . ($this->getName() != null ? '`'.$index->getName().'`' : '');
+        $indexcols = [];
+        foreach ($index->getColumns() as $key => $col) {
+            $indexcols[] = $col->render();
+        }
+        $output .= '('. implode(', ', $indexcols) .')';
+        return $output;
     }
 }

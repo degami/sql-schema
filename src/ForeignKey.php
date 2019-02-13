@@ -1,8 +1,8 @@
 <?php
 
-namespace CzProject\SqlSchema;
+namespace Degami\SqlSchema;
 
-use CzProject\SqlSchema\Exceptions\OutOfRangeException;
+use Degami\SqlSchema\Exceptions\OutOfRangeException;
 
 class ForeignKey
 {
@@ -173,5 +173,24 @@ class ForeignKey
         || $action === self::ACTION_NO_ACTION
         || $action === self::ACTION_CASCADE
         || $action === self::ACTION_SET_NULL;
+    }
+
+    /**
+     * @return string
+     */
+    public function render()
+    {
+        $output = 'CONSTRAINT ' . $this->getName() . ' FOREIGN KEY';
+        $output .= ' ('. implode(', ', $this->getColumns()) .')';
+        $output .= ' REFERENCES ' . $this->getTargetTable() . ' ';
+        $output .= '('. implode(', ', $this->getTargetColumns()) .')';
+
+        if ($this->getOnUpdateAction()) {
+            $output .= ' ON UPDATE ' . $this->getOnUpdateAction() . ' ';
+        }
+        if ($this->getOnDeleteAction()) {
+            $output .= ' ON DELETE ' . $this->getOnUpdateAction() . ' ';
+        }
+        return $output;
     }
 }

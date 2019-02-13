@@ -1,6 +1,6 @@
 <?php
 
-    namespace CzProject\SqlSchema;
+namespace Degami\SqlSchema;
 
 class Column
 {
@@ -229,5 +229,29 @@ class Column
     public function getComment()
     {
         return $this->comment;
+    }
+
+    /**
+     * @return string
+     */
+    public function render()
+    {
+        $output = '`'.$this->getName() . '`';
+        $output .= $this->getType().
+                (count($this->getParameters()) ? '('.implode(' ', $this->getParameters()).')' : '');
+
+        foreach ($this->getOptions() as $option => $value) {
+            $output .= ' ' . $option;
+            if (isset($value)) {
+                $output .= ' = ' . $value;
+            }
+        }
+
+        $output .= ($this->isNullable() == false ? ' NOT NULL' : '');
+        $output .= ($this->getDefaultValue() != null ? ' DEFAULT \''.$this->getDefaultValue().'\'' : '');
+        $output .= ($this->isAutoIncrement() == true ? ' AUTO_INCREMENT' : '');
+        $output .= (trim($this->getComment()) != '' ? ' COMMENT \''.$this->getComment().'\'' : '');
+
+        return $output;
     }
 }

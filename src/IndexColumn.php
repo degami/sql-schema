@@ -1,8 +1,8 @@
 <?php
 
-namespace CzProject\SqlSchema;
+namespace Degami\SqlSchema;
 
-use CzProject\SqlSchema\Exceptions\OutOfRangeException;
+use Degami\SqlSchema\Exceptions\OutOfRangeException;
 
 class IndexColumn
 {
@@ -88,5 +88,17 @@ class IndexColumn
     public function getLength()
     {
         return $this->length;
+    }
+
+    /**
+     * @return string
+     */
+    public function render()
+    {
+        $output = '`'.$this->getName().'` ';
+        $length = $this->getLength();
+        $output .= isset($length) ? '(' . $length . ')' : '';
+        $output .= ' ' . $this->getOrder();
+        return $output;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace CzProject\SqlSchema\Exceptions;
+namespace Degami\SqlSchema\Exceptions;
 
 class EmptyException extends Exception
 {

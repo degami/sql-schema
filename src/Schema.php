@@ -1,8 +1,8 @@
 <?php
 
-namespace CzProject\SqlSchema;
+namespace Degami\SqlSchema;
 
-use CzProject\SqlSchema\Exceptions\DuplicateException;
+use Degami\SqlSchema\Exceptions\DuplicateException;
 
 class Schema
 {

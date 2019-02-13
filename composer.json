@@ -1,13 +1,13 @@
 {
-	"name": "czproject/sql-schema",
+	"name": "degami/sql-schema",
 	"type": "library",
 	"description": "Library for describe of the database schema.",
 	"license": "BSD-3-Clause",
 	"authors": [
-		{
-			"name": "Jan Pecha",
-			"homepage": "https://www.janpecha.cz/"
-		}
+	{
+	  "name": "degami@github.com",
+	  "homepage": "https://github.com/degami/sql-schema"
+	}
 	],
 	"require": {
 		"php": ">=5.3.0"
@@ -16,10 +16,7 @@
 		"classmap": ["src/"]
 	},
     "psr-4": {
-      "CzProject\\SqlSchema\\": "src",
-      "CzProject\\SqlSchema\\Exceptions": "src/exceptions"
-    },
-	"require-dev": {
-		"nette/tester": "^1.7"
-	}
+      "Degami\\SqlSchema\\": "src",
+      "Degami\\SqlSchema\\Exceptions": "src/exceptions"
+    }
 }

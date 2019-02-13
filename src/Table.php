@@ -1,9 +1,9 @@
 <?php
 
-namespace CzProject\SqlSchema;
+namespace Degami\SqlSchema;
 
-use CzProject\SqlSchema\Exceptions\DuplicateException;
-use CzProject\SqlSchema\Exceptions\EmptyException;
+use Degami\SqlSchema\Exceptions\DuplicateException;
+use Degami\SqlSchema\Exceptions\EmptyException;
 
 class Table
 {
@@ -261,48 +261,17 @@ class Table
         $out = "CREATE TABLE " . $this->getName() . " (\n";
         $columns = [];
         foreach ($this->getColumns() as $k => $column) {
-            $col = [];
-
-            $col[] = '`'.$column->getName() . '`';
-            $col[] = $column->getType().
-                    (count($column->getParameters()) ? '('.implode(' ', $column->getParameters()).')' : '');
-            $col[] = implode(' ', array_keys($column->getOptions()));
-            $col[] = ($column->isNullable() == false ? 'NOT NULL' : '');
-            $col[] = ($column->getDefaultValue() != null ? 'DEFAULT \''.$column->getDefaultValue().'\'' : '');
-            $col[] = ($column->isAutoIncrement() == true ? 'AUTO_INCREMENT' : '');
-            $col[] = (trim($column->getComment()) != '' ? 'COMMENT \''.$column->getComment().'\'' : '');
-
-            $columns[] = implode(' ', array_filter($col));
+            $columns[] = $column->render();
         }
 
         $indexes = [];
         foreach ($this->getIndexes() as $key => $index) {
-            $idx = $index->getType() ;
-            $idx .= ' ' . ($index->getType() == 'PRIMARY' ? ' KEY' : '') ;
-            $idx .= ' ' . ($index->getName() != null ? '`'.$index->getName().'`' : '');
-            $indexcols = [];
-            foreach ($index->getColumns() as $ick => $indexcol) {
-                $indexcols[] = '`'.$indexcol->getName().'`';
-            }
-            $idx .= '('. implode(', ', $indexcols) .')';
-            $indexes[] = $idx;
+            $indexes[] = $index->render();
         }
 
         $foreigns = [];
         foreach ($this->getForeignKeys() as $key => $foreign) {
-            $idx = 'CONSTRAINT ' . $foreign->getName() . ' FOREIGN KEY';
-            $idx .= ' ('. implode(', ', $foreign->getColumns()) .')';
-            $idx .= ' REFERENCES ' . $foreign->getTargetTable() . ' ';
-            $idx .= '('. implode(', ', $foreign->getTargetColumns()) .')';
-
-            if ($foreign->getOnUpdateAction()) {
-                $idx .= ' ON UPDATE ' . $foreign->getOnUpdateAction() . ' ';
-            }
-            if ($foreign->getOnDeleteAction()) {
-                $idx .= ' ON DELETE ' . $foreign->getOnUpdateAction() . ' ';
-            }
-
-            $foreigns[] = $idx;
+            $foreigns[] = $foreign->render();
         }
 
         $out .= implode(",\n", $columns);
