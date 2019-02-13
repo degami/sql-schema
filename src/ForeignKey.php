@@ -15,7 +15,7 @@ class ForeignKey
     private $name;
 
     /** @var string[] */
-    private $columns = array();
+    private $columns = [];
 
     /** @var string */
     private $targetTable;
@@ -41,7 +41,7 @@ class ForeignKey
         $this->setTargetTable($targetTable);
 
         if (!is_array($columns)) {
-            $columns = array($columns);
+            $columns = [$columns];
         }
 
         foreach ($columns as $column) {
@@ -49,7 +49,7 @@ class ForeignKey
         }
 
         if (!is_array($targetColumns)) {
-            $targetColumns = array($targetColumns);
+            $targetColumns = [$targetColumns];
         }
 
         foreach ($targetColumns as $targetColumn) {

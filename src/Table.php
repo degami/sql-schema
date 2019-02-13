@@ -20,22 +20,22 @@ class Table
     /**
     * @var array  [name => Column]
     */
-    private $columns = array();
+    private $columns = [];
 
     /**
     * @var array  [name => Index]
     */
-    private $indexes = array();
+    private $indexes = [];
 
     /**
     * @var array  [name => ForeignKey]
     */
-    private $foreignKeys = array();
+    private $foreignKeys = [];
 
     /**
     * @var array  [name => value]
     */
-    private $options = array();
+    private $options = [];
 
     /**
     * @param string
@@ -97,7 +97,7 @@ class Table
     * @param  array OPTION => NULL
     * @return Column
     */
-    public function addColumn($name, $type = null, $parameters = null, array $options = array())
+    public function addColumn($name, $type = null, $parameters = null, array $options = [])
     {
         $column = null;
 
@@ -142,7 +142,7 @@ class Table
     * @param  string
     * @return Index
     */
-    public function addIndex($name, $columns = array(), $type = Index::TYPE_INDEX)
+    public function addIndex($name, $columns = [], $type = Index::TYPE_INDEX)
     {
         $index = null;
 
@@ -189,7 +189,7 @@ class Table
     * @param  string[]|string
     * @return ForeignKey
     */
-    public function addForeignKey($name, $columns = array(), $targetTable = null, $targetColumns = array())
+    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [])
     {
         $foreignKey = null;
 

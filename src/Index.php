@@ -18,20 +18,20 @@ class Index
     private $type;
 
     /** @var IndexColumn[] */
-    private $columns = array();
+    private $columns = [];
 
     /**
      * @param  string
      * @param  string[]|string
      * @param  string
      */
-    public function __construct($name, $columns = array(), $type = self::TYPE_INDEX)
+    public function __construct($name, $columns = [], $type = self::TYPE_INDEX)
     {
         $this->name = $name;
         $this->setType($type);
 
         if (!is_array($columns)) {
-            $columns = array($columns);
+            $columns = [$columns];
         }
 
         foreach ($columns as $column) {

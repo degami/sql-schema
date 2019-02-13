@@ -14,10 +14,10 @@ class Column
     private $type;
 
     /** @var array */
-    private $parameters = array();
+    private $parameters = [];
 
     /** @var array */
-    private $options = array();
+    private $options = [];
 
     /** @var bool */
     private $nullable = false;
@@ -38,7 +38,7 @@ class Column
      * @param  array|string|NULL
      * @param  array  [OPTION => VALUE, OPTION2]
      */
-    public function __construct($name, $type, array $parameters = null, array $options = array())
+    public function __construct($name, $type, array $parameters = null, array $options = [])
     {
         $this->name = $name;
         $this->setType($type);
@@ -83,9 +83,9 @@ class Column
     public function setParameters($parameters)
     {
         if ($parameters === null) {
-            $parameters = array();
+            $parameters = [];
         } elseif (!is_array($parameters)) {
-            $parameters = array($parameters);
+            $parameters = [$parameters];
         }
 
         $this->parameters = $parameters;
@@ -120,7 +120,7 @@ class Column
      */
     public function setOptions(array $options)
     {
-        $this->options = array();
+        $this->options = [];
 
         foreach ($options as $k => $v) {
             if (is_int($k)) {

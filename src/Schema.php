@@ -7,7 +7,7 @@ use Degami\SqlSchema\Exceptions\DuplicateException;
 class Schema
 {
     /** @var array  [name => Table] */
-    private $tables = array();
+    private $tables = [];
 
     /**
     * @param  string|Table
