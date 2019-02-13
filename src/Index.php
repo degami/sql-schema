@@ -102,11 +102,11 @@ class Index
      */
     public function render()
     {
-        $output = $index->getType() ;
+        $output = $this->getType() ;
         $output .= ' ' . ($this->getType() == 'PRIMARY' ? ' KEY' : '') ;
-        $output .= ' ' . ($this->getName() != null ? '`'.$index->getName().'`' : '');
+        $output .= ' ' . ($this->getName() != null ? '`'.$this->getName().'`' : '');
         $indexcols = [];
-        foreach ($index->getColumns() as $key => $col) {
+        foreach ($this->getColumns() as $key => $col) {
             $indexcols[] = $col->render();
         }
         $output .= '('. implode(', ', $indexcols) .')';
