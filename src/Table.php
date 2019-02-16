@@ -183,6 +183,23 @@ class Table
     }
 
     /**
+     * @param string $columnName
+     * @return self
+     */
+    public function setAutoIncrementColumn($columnName)
+    {
+        if ($this->getColumn($columnName) == null) {
+            throw new EmptyException("Column not found", 1);
+        }
+        foreach ($this->getColumns() as $key => &$colum) {
+            $colum->setAutoIncrement(false);
+        }
+        $this->getColumn($columnName)->setAutoIncrement(true);
+
+        return $this;
+    }
+
+    /**
     * @param  string|ForeignKey
     * @param  string[]|string
     * @param  string
