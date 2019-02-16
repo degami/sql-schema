@@ -11,7 +11,7 @@ forked from : https://github.com/czproject/sql-schema
 composer require degami/sql-schema
 ```
 
-Degami\SqlSchema requires PHP 5.3.0 or later.
+Degami\SqlSchema requires PHP 5.5.0 or later.
 
 ## Usage
 
