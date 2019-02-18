@@ -275,7 +275,7 @@ class Table
     */
     public function showCreate()
     {
-        $out = "CREATE TABLE " . $this->getName() . " (\n";
+        $out = "CREATE TABLE `" . $this->getName() . "` (\n";
         $columns = [];
         foreach ($this->getColumns() as $k => $column) {
             $columns[] = $column->render();
