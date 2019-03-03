@@ -97,7 +97,7 @@ class Table
     * @param  array OPTION => NULL
     * @return Column
     */
-    public function addColumn($name, $type = null, $parameters = null, array $options = [])
+    public function addColumn($name, $type = null, $parameters = null, array $options = [], $default = null)
     {
         $column = null;
 
@@ -105,7 +105,7 @@ class Table
             $column = $name;
             $name = $column->getName();
         } else {
-            $column = new Column($name, $type, $parameters, $options);
+            $column = new Column($name, $type, $parameters, $options, $default);
         }
 
         if (isset($this->columns[$name])) {

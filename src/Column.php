@@ -20,7 +20,7 @@ class Column
     private $options = [];
 
     /** @var bool */
-    private $nullable = false;
+    private $nullable = true;
 
     /** @var bool */
     private $autoIncrement = false;
@@ -197,7 +197,7 @@ class Column
      * @param  scalar|NULL
      * @return self
      */
-    public function setDefaultValue($defaultValue)
+    public function setDefaultValue($defaultValue = null)
     {
         if (strtoupper($defaultValue) == 'NULL') {
             $this->setNullable(true);
@@ -213,12 +213,15 @@ class Column
      */
     public function getDefaultValue()
     {
-        if (strtoupper($this->defaultValue) == 'NULL') {
-            return 'NULL';
-        } else if (stripos($this->defaultValue, "()")) {
-            return $this->defaultValue;
+        if ($this->defaultValue != null) {
+            if (strtoupper($this->defaultValue) == 'NULL') {
+                return 'NULL';
+            } else if (stripos($this->defaultValue, "()")) {
+                return $this->defaultValue;
+            }
+            return "'{$this->defaultValue}'";
         }
-        return "'{$this->defaultValue}'";
+        return null;
     }
 
 
@@ -257,7 +260,7 @@ class Column
             }
         }
 
-        $output .= ($this->isNullable() == false ? ' NOT NULL' : '');
+        $output .= ($this->isNullable() === false ? ' NOT NULL' : '');
         $output .= ($this->getDefaultValue() != null ? ' DEFAULT '.$this->getDefaultValue() : '');
         $output .= ($this->isAutoIncrement() == true ? ' AUTO_INCREMENT' : '');
         $output .= (trim($this->getComment()) != '' ? ' COMMENT \''.$this->getComment().'\'' : '');
