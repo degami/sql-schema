@@ -38,12 +38,13 @@ class Column
      * @param  array|string|NULL
      * @param  array  [OPTION => VALUE, OPTION2]
      */
-    public function __construct($name, $type, array $parameters = null, array $options = [])
+    public function __construct($name, $type, array $parameters = null, array $options = [], $default = null)
     {
         $this->name = $name;
         $this->setType($type);
         $this->setParameters($parameters);
         $this->setOptions($options);
+        $this->setDefaultValue($default);
     }
 
 
@@ -198,6 +199,10 @@ class Column
      */
     public function setDefaultValue($defaultValue)
     {
+        if (strtoupper($defaultValue) == 'NULL') {
+            $this->setNullable(true);
+        }
+
         $this->defaultValue = $defaultValue;
         return $this;
     }
@@ -208,7 +213,12 @@ class Column
      */
     public function getDefaultValue()
     {
-        return $this->defaultValue;
+        if (strtoupper($this->defaultValue) == 'NULL') {
+            return 'NULL';
+        } else if (stripos($this->defaultValue, "()")) {
+            return $this->defaultValue;
+        }
+        return "'{$this->defaultValue}'";
     }
 
 
@@ -248,7 +258,7 @@ class Column
         }
 
         $output .= ($this->isNullable() == false ? ' NOT NULL' : '');
-        $output .= ($this->getDefaultValue() != null ? ' DEFAULT \''.$this->getDefaultValue().'\'' : '');
+        $output .= ($this->getDefaultValue() != null ? ' DEFAULT '.$this->getDefaultValue() : '');
         $output .= ($this->isAutoIncrement() == true ? ' AUTO_INCREMENT' : '');
         $output .= (trim($this->getComment()) != '' ? ' COMMENT \''.$this->getComment().'\'' : '');
 
