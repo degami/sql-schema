@@ -35,7 +35,7 @@ class ForeignKey
      * @param  string
      * @param  string[]|string
      */
-    public function __construct($name, $columns, $targetTable, $targetColumns)
+    public function __construct($name, $columns, $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT)
     {
         $this->name = $name;
         $this->setTargetTable($targetTable);
@@ -55,6 +55,9 @@ class ForeignKey
         foreach ($targetColumns as $targetColumn) {
             $this->addTargetColumn($targetColumn);
         }
+
+        $this->onUpdateAction = $onUpdateAction;
+        $this->onDeleteAction = $onDeleteAction;
     }
 
     /**

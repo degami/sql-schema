@@ -231,7 +231,7 @@ class Table
     * @param  string[]|string
     * @return ForeignKey
     */
-    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [])
+    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT)
     {
         $foreignKey = null;
 
@@ -239,7 +239,7 @@ class Table
             $foreignKey = $name;
             $name = $foreignKey->getName();
         } else {
-            $foreignKey = new ForeignKey($name, $columns, $targetTable, $targetColumns);
+            $foreignKey = new ForeignKey($name, $columns, $targetTable, $targetColumns, $onUpdateAction, $onDeleteAction);
             $name = $foreignKey->getName();
         }
 
@@ -331,7 +331,7 @@ class Table
 
         $out .= ")";
         if ($this->getStorageEngine()) {
-            $out .= "\n STORAGE ENGINE = ".$this->getStorageEngine();
+            $out .= " ENGINE = ".$this->getStorageEngine();
         }
         $out .= ";";
 
