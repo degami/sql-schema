@@ -38,6 +38,11 @@ class Table
     private $options = [];
 
     /**
+    * @var string storage engine
+    */
+    private $storageEngine = null;
+
+    /**
     * @param string
     */
     public function __construct($name)
@@ -88,6 +93,26 @@ class Table
     public function getOptions()
     {
         return $this->options;
+    }
+
+    /**
+     * @return string storage engine
+     */
+    public function getStorageEngine()
+    {
+        return $this->storageEngine;
+    }
+
+    /**
+     * @param string storage engine $storageEngine
+     *
+     * @return self
+     */
+    public function setStorageEngine($storageEngine)
+    {
+        $this->storageEngine = $storageEngine;
+
+        return $this;
     }
 
     /**
@@ -304,7 +329,12 @@ class Table
         }
         $out .= ((!empty($foreigns)) ? "\n":'');
 
-        $out .= ");";
+        $out .= ")";
+        if ($this->getStorageEngine()) {
+            $out .= "\n STORAGE ENGINE = ".$this->getStorageEngine();
+        }
+        $out .= ";";
+
         return $out;
     }
 }
