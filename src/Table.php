@@ -130,8 +130,7 @@ class Table
      * @param mixed   $default
      * @return self
      */
-    */
-    public function addColumn($name, $type = null, $parameters = null, array $options = [], $default = null)
+    public function addColumn($name, $type = null, $parameters = null, array $options = [], $nullable = true, $default = null)
     {
         $column = null;
 
@@ -139,7 +138,7 @@ class Table
             $column = $name;
             $name = $column->getName();
         } else {
-            $column = new Column($name, $type, $parameters, $options, $default);
+            $column = new Column($name, $type, $parameters, $options, $nullable, $default);
         }
 
         if (isset($this->columns[$name])) {
