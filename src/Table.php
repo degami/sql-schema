@@ -50,7 +50,8 @@ class Table
         $this->name = $name;
     }
 
-    /**
+   /**
+    * get Name
     * @return string
     */
     public function getName()
@@ -58,9 +59,10 @@ class Table
         return $this->name;
     }
 
-    /**
-    * @param  string|NULL
-    * @return self
+   /**
+    * set Comment
+    * @param string $comment
+    * @return  self
     */
     public function setComment($comment)
     {
@@ -68,17 +70,19 @@ class Table
         return $this;
     }
 
-    /**
-    * @return string|NULL
+   /**
+    * get Comment
+    * @return string
     */
     public function getComment()
     {
         return $this->comment;
     }
 
-    /**
-    * @param  string
-    * @param  string
+   /**
+    * set Option
+    * @param string $name
+    * @param string $value
     * @return self
     */
     public function setOption($name, $value)
@@ -87,7 +91,8 @@ class Table
         return $this;
     }
 
-    /**
+   /**
+    * get Options
     * @return array
     */
     public function getOptions()
@@ -116,11 +121,15 @@ class Table
     }
 
     /**
-    * @param  string|Column
-    * @param  string|NULL
-    * @param  array|string|NULL
-    * @param  array OPTION => NULL
-    * @return Column
+     * add Column
+     * @param string  $name
+     * @param string  $type
+     * @param mixed   $parameters
+     * @param array   $options
+     * @param boolean $nullable
+     * @param mixed   $default
+     * @return self
+     */
     */
     public function addColumn($name, $type = null, $parameters = null, array $options = [], $default = null)
     {
@@ -141,9 +150,10 @@ class Table
         return $this;
     }
 
-    /**
-    * @param  string
-    * @return Column|NULL
+   /**
+    * get Column
+    * @param  string $name
+    * @return Column|null
     */
     public function getColumn($name)
     {
@@ -154,18 +164,19 @@ class Table
     }
 
     /**
-    * @return Column[]
-    */
+     * get Columns
+     * @return Column[]
+     */
     public function getColumns()
     {
         return $this->columns;
     }
 
-    /**
-    * @param  string|Index|NULL
-    * @param  string[]|string
-    * @param  string
-    * @return Index
+   /**
+    * add Index
+    * @param string|Index $name
+    * @param array  $Columns
+    * @param string $type
     */
     public function addIndex($name, $columns = [], $type = Index::TYPE_INDEX)
     {
@@ -187,9 +198,10 @@ class Table
         return $this;
     }
 
-    /**
-    * @param  string
-    * @return Index|NULL
+   /**
+    * get Index
+    * @param  string $name
+    * @return Index|null
     */
     public function getIndex($name)
     {
@@ -199,7 +211,8 @@ class Table
         return null;
     }
 
-    /**
+   /**
+    * get Indexes
     * @return Index[]
     */
     public function getIndexes()
@@ -208,6 +221,7 @@ class Table
     }
 
     /**
+     * set AutoIncrement Column
      * @param string $columnName
      * @return self
      */
@@ -224,11 +238,12 @@ class Table
         return $this;
     }
 
-    /**
-    * @param  string|ForeignKey
-    * @param  string[]|string
-    * @param  string
-    * @param  string[]|string
+   /**
+    * add Foreign Key
+    * @param string|ForeignKey $name
+    * @param array  $columns
+    * @param string $targetTable
+    * @param array  $targetColumns
     * @return ForeignKey
     */
     public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT)
@@ -263,7 +278,8 @@ class Table
         return null;
     }
 
-    /**
+   /**
+    * get Foreign Keys
     * @return ForeignKey[]
     */
     public function getForeignKeys()
@@ -271,7 +287,8 @@ class Table
         return $this->foreignKeys;
     }
 
-    /**
+   /**
+    * validate
     * @throws Exception
     * @return void
     */
@@ -295,7 +312,8 @@ class Table
         }
     }
 
-    /**
+   /**
+    * show Create
     * @return string
     */
     public function showCreate()

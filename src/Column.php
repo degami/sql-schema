@@ -38,12 +38,13 @@ class Column
      * @param  array|string|NULL
      * @param  array  [OPTION => VALUE, OPTION2]
      */
-    public function __construct($name, $type, array $parameters = null, array $options = [], $default = null)
+    public function __construct($name, $type, array $parameters = null, array $options = [], $nullable = true, $default = null)
     {
         $this->name = $name;
         $this->setType($type);
         $this->setParameters($parameters);
         $this->setOptions($options);
+        $this->setNullable($nullable);
         $this->setDefaultValue($default);
     }
 
@@ -201,6 +202,8 @@ class Column
     {
         if (strtoupper($defaultValue) == 'NULL') {
             $this->setNullable(true);
+        } else {
+            $this->setNullable(false);
         }
 
         $this->defaultValue = $defaultValue;
