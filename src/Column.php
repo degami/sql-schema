@@ -202,7 +202,7 @@ class Column
     {
         if (strtoupper($defaultValue) == 'NULL') {
             $this->setNullable(true);
-        } else {
+        } elseif ($defaultValue !== null) {
             $this->setNullable(false);
         }
 
