@@ -252,7 +252,7 @@ class Column
      */
     public function render()
     {
-        $output = '`'.$this->getName() . '`';
+        $output = '`'.$this->getName() . '` ';
         $output .= $this->getType().
                 (count($this->getParameters()) ? '('.implode(' ', $this->getParameters()).')' : '');
 
