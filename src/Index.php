@@ -3,8 +3,9 @@
 namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\OutOfRangeException;
+use Degami\SqlSchema\Abstracts\DBComponent;
 
-class Index
+class Index extends DBComponent
 {
     const TYPE_INDEX = 'INDEX';
     const TYPE_PRIMARY = 'PRIMARY';
@@ -25,7 +26,7 @@ class Index
      * @param  string[]|string
      * @param  string
      */
-    public function __construct($name, $columns = [], $type = self::TYPE_INDEX)
+    public function __construct($name, $columns = [], $type = self::TYPE_INDEX, $existing_on_db = false)
     {
         $this->name = $name;
         $this->setType($type);
@@ -35,8 +36,10 @@ class Index
         }
 
         foreach ($columns as $column) {
-            $this->addColumn($column);
+            $this->addColumn($column, boolval($existing_on_db));
         }
+
+        $this->isExistingOnDb(boolval($existing_on_db));
     }
 
     /**
@@ -64,6 +67,7 @@ class Index
         }
 
         $this->type = $type;
+        $this->isModified(true);
         return $this;
     }
 
@@ -79,13 +83,14 @@ class Index
      * @param  IndexColumn|string
      * @return IndexColumn
      */
-    public function addColumn($column)
+    public function addColumn($column, $existing_on_db = null)
     {
         if (!($column instanceof IndexColumn)) {
-            $column = new IndexColumn($column);
+            $column = new IndexColumn($column, IndexColumn::ASC, null, $existing_on_db);
         }
 
         $this->columns[] = $column;
+        $this->isModified(true);
         return $this;
     }
 

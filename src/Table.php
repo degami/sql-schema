@@ -4,8 +4,10 @@ namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\DuplicateException;
 use Degami\SqlSchema\Exceptions\EmptyException;
+use Degami\SqlSchema\Exceptions\OutOfRangeException;
+use Degami\SqlSchema\Abstracts\DBComponent;
 
-class Table
+class Table extends DBComponent
 {
     /**
     * @var string
@@ -45,9 +47,10 @@ class Table
     /**
     * @param string
     */
-    public function __construct($name)
+    public function __construct($name, $existing_on_db = false)
     {
         $this->name = $name;
+        $this->isExistingOnDb(boolval($existing_on_db));
     }
 
    /**
@@ -88,6 +91,7 @@ class Table
     public function setOption($name, $value)
     {
         $this->options[$name] = $value;
+        $this->isModified(true);
         return $this;
     }
 
@@ -116,7 +120,7 @@ class Table
     public function setStorageEngine($storageEngine)
     {
         $this->storageEngine = $storageEngine;
-
+        $this->isModified(true);
         return $this;
     }
 
@@ -130,7 +134,7 @@ class Table
      * @param mixed   $default
      * @return self
      */
-    public function addColumn($name, $type = null, $parameters = null, array $options = [], $nullable = true, $default = null)
+    public function addColumn($name, $type = null, $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
     {
         $column = null;
 
@@ -146,6 +150,18 @@ class Table
         }
 
         $this->columns[$name] = $column;
+        $this->isModified(true);
+        return $this;
+    }
+
+   /**
+    * deletes Column
+    * @param  string $name
+    * @return self
+    */
+    public function deleteColumn($name)
+    {
+        $this->getColumn($name)->isDeleted(true);
         return $this;
     }
 
@@ -159,7 +175,8 @@ class Table
         if (isset($this->columns[$name])) {
             return $this->columns[$name];
         }
-        return null;
+
+        throw new OutOfRangeException("Column not found");
     }
 
     /**
@@ -177,7 +194,7 @@ class Table
     * @param array  $Columns
     * @param string $type
     */
-    public function addIndex($name, $columns = [], $type = Index::TYPE_INDEX)
+    public function addIndex($name, $columns = [], $type = Index::TYPE_INDEX, $existing_on_db = false)
     {
         $index = null;
 
@@ -185,7 +202,7 @@ class Table
             $index = $name;
             $name = $index->getName();
         } else {
-            $index = new Index($name, $columns, $type);
+            $index = new Index($name, $columns, $type, $existing_on_db);
             $name = $index->getName();
         }
 
@@ -194,6 +211,7 @@ class Table
         }
 
         $this->indexes[$name] = $index;
+        $this->isModified(true);
         return $this;
     }
 
@@ -207,7 +225,19 @@ class Table
         if (isset($this->indexes[$name])) {
             return $this->indexes[$name];
         }
-        return null;
+
+        throw new OutOfRangeException("Index not found");
+    }
+
+   /**
+    * deletes Index
+    * @param  string $name
+    * @return self
+    */
+    public function deleteIndex($name)
+    {
+        $this->getIndex($name)->isDeleted(true);
+        return $this;
     }
 
    /**
@@ -233,7 +263,7 @@ class Table
             $colum->setAutoIncrement(false);
         }
         $this->getColumn($columnName)->setAutoIncrement(true);
-
+        $this->isModified(true);
         return $this;
     }
 
@@ -245,7 +275,7 @@ class Table
     * @param array  $targetColumns
     * @return ForeignKey
     */
-    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT)
+    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT, $existing_on_db = false)
     {
         $foreignKey = null;
 
@@ -253,7 +283,7 @@ class Table
             $foreignKey = $name;
             $name = $foreignKey->getName();
         } else {
-            $foreignKey = new ForeignKey($name, $columns, $targetTable, $targetColumns, $onUpdateAction, $onDeleteAction);
+            $foreignKey = new ForeignKey($name, $columns, $targetTable, $targetColumns, $onUpdateAction, $onDeleteAction, $existing_on_db);
             $name = $foreignKey->getName();
         }
 
@@ -262,6 +292,7 @@ class Table
         }
 
         $this->foreignKeys[$name] = $foreignKey;
+        $this->isModified(true);
         return $this;
     }
 
@@ -275,6 +306,17 @@ class Table
             return $this->foreignKeys[$name];
         }
         return null;
+    }
+
+   /**
+    * deletes Foreign Key
+    * @param  string $name
+    * @return self
+    */
+    public function deleteForeignKey($name)
+    {
+        $this->getForeignKey($name)->isDeleted(true);
+        return $this;
     }
 
    /**
@@ -353,5 +395,110 @@ class Table
         $out .= ";";
 
         return $out;
+    }
+
+    public static function readFromExisting($dbname, $tablename, $pdo)
+    {
+        $sql_queries = [
+            'create' => "SHOW CREATE TABLE {$dbname}.{$tablename}",
+            'fields' => "DESCRIBE {$dbname}.{$tablename}",
+            //'index' => "SHOW INDEX FROM {$dbname}.{$tablename}",
+
+            'index' => "SELECT
+                tc.CONSTRAINT_NAME,
+                tc.CONSTRAINT_TYPE,
+                GROUP_CONCAT(kcu.COLUMN_NAME) AS COLUMN_NAME
+                FROM `TABLE_CONSTRAINTS` tc
+                INNER JOIN `KEY_COLUMN_USAGE` kcu ON (
+                tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME AND
+                kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA AND kcu.TABLE_NAME = tc.TABLE_NAME
+                )
+                WHERE tc.TABLE_SCHEMA = '{$dbname}' AND tc.`TABLE_NAME` LIKE '{$tablename}'
+                GROUP BY tc.CONSTRAINT_NAME",
+            'refs' => "SELECT
+                kcu.TABLE_NAME,
+                GROUP_CONCAT(kcu.COLUMN_NAME) AS COLUMN_NAME,
+                kcu.CONSTRAINT_NAME,
+                kcu.REFERENCED_TABLE_NAME,
+                GROUP_CONCAT(kcu.REFERENCED_COLUMN_NAME) AS REFERENCED_COLUMN_NAME,
+                rc.UPDATE_RULE,
+                rc.DELETE_RULE
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+                INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc ON (
+                rc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME AND
+                kcu.TABLE_SCHEMA = rc.UNIQUE_CONSTRAINT_SCHEMA AND kcu.TABLE_NAME = rc.TABLE_NAME
+                )
+                WHERE kcu.REFERENCED_TABLE_SCHEMA = '{$dbname}' AND kcu.TABLE_NAME = '{$tablename}'
+                GROUP BY kcu.CONSTRAINT_NAME",
+        ];
+
+        $info = [];
+
+        foreach ($sql_queries as $index => $sql) {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            $info[$index] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        }
+
+        $table = new static($tablename);
+
+        foreach ($info['fields'] as $field) {
+            $name = $field['Field'];
+
+            $type = $field['Type'];
+            $parameters = null;
+            $options = [];
+
+            if (preg_match("/(.*?)\((.*?)\)(.*?)/i", $field['Type'], $matches)) {
+                $type = $matches[1];
+                $parameters = [$matches[2]];
+
+                if (!empty($matches[3])) {
+                    $options = explode(" ", trim($matches[3]));
+                }
+            } elseif (count(explode(" ", $field['Type'])) > 1) {
+                $tmp = explode(" ", $field['Type']);
+
+                $type = reset($tmp);
+                $options = array_slice($tmp, 1);
+            }
+
+
+            $nullable = ($field['Type'] == 'YES');
+            $default = $field['Default'];
+
+            $table->addColumn($name, $type, $parameters, $options, $nullable, $default, true);
+
+            if ($field['Extra'] == 'auto_increment') {
+                $table->setAutoIncrementColumn($name);
+            }
+        }
+
+        foreach ($info['index'] as $index) {
+            $name = $index['Key_name'];
+
+            $type = Index::TYPE_INDEX;
+            if ($name == 'PRIMARY') {
+                $name = null;
+                $type = Index::TYPE_PRIMARY;
+            } else if (boolval($index['Non_unique']) != false) {
+                $type = Index::TYPE_UNIQUE;
+            }
+            // $type = Index::TYPE_FULLTEXT;
+            $columns = [$index['Column_name']];
+
+            $table->addIndex($name, $columns, $type, true);
+        }
+
+        foreach ($info['refs'] as $relation) {
+            $name = $relation['CONSTRAINT_NAME'];
+            $columns = explode(",", $relation['COLUMN_NAME']);
+            $targetTable = $relation['REFERENCED_TABLE_NAME'];
+            $targetColumns = explode(",", $relation['REFERENCED_COLUMN_NAME']);
+
+            $table->addForeignKey($name, $columns, $targetTable, $targetColumns, ForeignKey::ACTION_RESTRICT, ForeignKey::ACTION_RESTRICT, true);
+        }
+
+        return $table;
     }
 }

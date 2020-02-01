@@ -3,8 +3,9 @@
 namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\OutOfRangeException;
+use Degami\SqlSchema\Abstracts\DBComponent;
 
-class ForeignKey
+class ForeignKey extends DBComponent
 {
     const ACTION_RESTRICT = 'RESTRICT';
     const ACTION_NO_ACTION = 'NO ACTION';
@@ -35,7 +36,7 @@ class ForeignKey
      * @param  string
      * @param  string[]|string
      */
-    public function __construct($name, $columns, $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT)
+    public function __construct($name, $columns, $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT, $existing_on_db = false)
     {
         $this->name = $name;
         $this->setTargetTable($targetTable);
@@ -58,6 +59,8 @@ class ForeignKey
 
         $this->onUpdateAction = $onUpdateAction;
         $this->onDeleteAction = $onDeleteAction;
+
+        $this->isExistingOnDb(boolval($existing_on_db));
     }
 
     /**
@@ -93,6 +96,7 @@ class ForeignKey
     public function setTargetTable($targetTable)
     {
         $this->targetTable = $targetTable;
+        $this->isModified(true);
         return $this;
     }
 
@@ -111,6 +115,7 @@ class ForeignKey
     public function addTargetColumn($targetColumn)
     {
         $this->targetColumns[] = $targetColumn;
+        $this->isModified(true);
         return $this;
     }
 
@@ -133,6 +138,7 @@ class ForeignKey
         }
 
         $this->onUpdateAction = $onUpdateAction;
+        $this->isModified(true);
         return $this;
     }
 
@@ -155,6 +161,7 @@ class ForeignKey
         }
 
         $this->onDeleteAction = $onDeleteAction;
+        $this->isModified(true);
         return $this;
     }
 

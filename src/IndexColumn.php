@@ -3,8 +3,9 @@
 namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\OutOfRangeException;
+use Degami\SqlSchema\Abstracts\DBComponent;
 
-class IndexColumn
+class IndexColumn extends DBComponent
 {
     const ASC = 'ASC';
     const DESC = 'DESC';
@@ -23,11 +24,12 @@ class IndexColumn
      * @param  string
      * @param  int|NULL
      */
-    public function __construct($name, $order = self::ASC, $length = null)
+    public function __construct($name, $order = self::ASC, $length = null, $existing_on_db = false)
     {
-        $this->setName($name);
-        $this->setOrder($order);
-        $this->setLength($length);
+        $this->name = $name;
+        $this->order = $order;
+        $this->length = $length;
+        $this->isExistingOnDb(boolval($existing_on_db));
     }
 
     /**
@@ -37,6 +39,7 @@ class IndexColumn
     public function setName($name)
     {
         $this->name = $name;
+        $this->isModified(true);
         return $this;
     }
 
@@ -61,6 +64,7 @@ class IndexColumn
         }
 
         $this->order = $order;
+        $this->isModified(true);
         return $this;
     }
 
@@ -79,6 +83,7 @@ class IndexColumn
     public function setLength($length)
     {
         $this->length = $length;
+        $this->isModified(true);
         return $this;
     }
 

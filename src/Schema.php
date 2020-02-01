@@ -3,11 +3,39 @@
 namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\DuplicateException;
+use Degami\SqlSchema\Exceptions\OutOfRangeException;
 
 class Schema
 {
+    /** @var string */
+    private $name;
+
     /** @var array  [name => Table] */
     private $tables = [];
+
+    /** @var \PDO|null */
+    private $pdo;
+
+
+    public function __construct($pdo = null)
+    {
+        $this->pdo = $pdo;
+
+        if ($this->pdo instanceof \PDO) {
+            $dbname = $pdo->query('SELECT DATABASE()')->fetchColumn();
+            foreach ($pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN) as $key => $tablename) {
+                $this->addTable(Table::readFromExisting($dbname, $tablename, $pdo));
+            }
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 
     /**
     * @param  string|Table
@@ -41,7 +69,18 @@ class Schema
             return $this->tables[$name];
         }
 
-        return null;
+        throw new OutOfRangeException("Column not found");
+    }
+
+   /**
+    * deletes Table
+    * @param  string $name
+    * @return self
+    */
+    public function deleteTable($name)
+    {
+        $this->getTable($name)->isDeleted(true);
+        return $this;
     }
 
     /**

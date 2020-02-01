@@ -10,13 +10,13 @@
 	}
 	],
 	"require": {
-		"php": ">=5.5.0"
+		"php": ">=5.5.0",
+		"degami/basics": "dev-master"
 	},
 	"autoload": {
 		"files": [],
 	    "psr-4": {
-	      "Degami\\SqlSchema\\": "src",
-	      "Degami\\SqlSchema\\Exceptions\\": "src/exceptions"
+	      "Degami\\SqlSchema\\": "src"
 	    }
 	}
 }

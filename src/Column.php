@@ -2,7 +2,9 @@
 
 namespace Degami\SqlSchema;
 
-class Column
+use Degami\SqlSchema\Abstracts\DBComponent;
+
+class Column extends DBComponent
 {
     const OPTION_UNSIGNED = 'UNSIGNED';
     const OPTION_ZEROFILL = 'ZEROFILL';
@@ -31,14 +33,13 @@ class Column
     /** @var string|NULL */
     private $comment;
 
-
     /**
      * @param  string
      * @param  string|NULL
      * @param  array|string|NULL
      * @param  array  [OPTION => VALUE, OPTION2]
      */
-    public function __construct($name, $type, array $parameters = null, array $options = [], $nullable = true, $default = null)
+    public function __construct($name, $type, array $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
     {
         $this->name = $name;
         $this->setType($type);
@@ -46,6 +47,8 @@ class Column
         $this->setOptions($options);
         $this->setNullable($nullable);
         $this->setDefaultValue($default);
+
+        $this->isExistingOnDb(boolval($existing_on_db));
     }
 
 
@@ -65,6 +68,7 @@ class Column
     public function setType($type)
     {
         $this->type = $type;
+        $this->isModified(true);
         return $this;
     }
 
@@ -91,6 +95,7 @@ class Column
         }
 
         $this->parameters = $parameters;
+        $this->isModified(true);
         return $this;
     }
 
@@ -112,6 +117,7 @@ class Column
     public function addOption($option, $value = null)
     {
         $this->options[$option] = $value;
+        $this->isModified(true);
         return $this;
     }
 
@@ -131,7 +137,7 @@ class Column
                 $this->options[$k] = $v;
             }
         }
-
+        $this->isModified(true);
         return $this;
     }
 
@@ -161,6 +167,7 @@ class Column
     public function setNullable($nullable = true)
     {
         $this->nullable = $nullable;
+        $this->isModified(true);
         return $this;
     }
 
@@ -181,6 +188,7 @@ class Column
     public function setAutoIncrement($autoIncrement = true)
     {
         $this->autoIncrement = $autoIncrement;
+        $this->isModified(true);
         return $this;
     }
 
@@ -207,6 +215,7 @@ class Column
         }
 
         $this->defaultValue = $defaultValue;
+        $this->isModified(true);
         return $this;
     }
 
@@ -235,6 +244,7 @@ class Column
     public function setComment($comment)
     {
         $this->comment = $comment;
+        $this->isModified(true);
         return $this;
     }
 
