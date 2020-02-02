@@ -142,7 +142,7 @@ class Table extends DBComponent
             $column = $name;
             $name = $column->getName();
         } else {
-            $column = new Column($name, $type, $parameters, $options, $nullable, $default);
+            $column = new Column($name, $this, $type, $parameters, $options, $nullable, $default);
         }
 
         if (isset($this->columns[$name])) {
@@ -202,7 +202,7 @@ class Table extends DBComponent
             $index = $name;
             $name = $index->getName();
         } else {
-            $index = new Index($name, $columns, $type, $existing_on_db);
+            $index = new Index($name, $this, $columns, $type, $existing_on_db);
             $name = $index->getName();
         }
 
@@ -283,7 +283,7 @@ class Table extends DBComponent
             $foreignKey = $name;
             $name = $foreignKey->getName();
         } else {
-            $foreignKey = new ForeignKey($name, $columns, $targetTable, $targetColumns, $onUpdateAction, $onDeleteAction, $existing_on_db);
+            $foreignKey = new ForeignKey($name, $this, $columns, $targetTable, $targetColumns, $onUpdateAction, $onDeleteAction, $existing_on_db);
             $name = $foreignKey->getName();
         }
 
@@ -397,6 +397,44 @@ class Table extends DBComponent
         return $out;
     }
 
+    public function showDrop()
+    {
+        return "DROP TABLE ".$this->getName().";";
+    }
+
+    public function migrate()
+    {
+        if ($this->isExistingOnDb() && $this->isDeleted()) {
+            return $this->showDrop();
+        } else if (!$this->isExistingOnDb()) {
+            return $this->showCreate();
+        } else {
+            return $this->showAlter();
+        }
+    }
+
+    public function showAlter()
+    {
+        $out = "ALTER TABLE ".$this->getName()." ";
+        $columns = [];
+        foreach ($this->getColumns() as $key => $column) {
+            $columns[] = $column->showAlter();
+        }
+
+        $out .= implode(",", $columns);
+        $out .= ';';
+
+        foreach ($this->getIndexes() as $key => $index) {
+            $out .= $index->showAlter();
+        }
+
+        foreach ($this->getForeignKeys() as $key => $foreign) {
+            $out .= $foreign->showAlter();
+        }
+
+        return $out;
+    }
+
     public static function readFromExisting($dbname, $tablename, $pdo)
     {
         $sql_queries = [
@@ -408,8 +446,8 @@ class Table extends DBComponent
                 tc.CONSTRAINT_NAME,
                 tc.CONSTRAINT_TYPE,
                 GROUP_CONCAT(kcu.COLUMN_NAME) AS COLUMN_NAME
-                FROM `TABLE_CONSTRAINTS` tc
-                INNER JOIN `KEY_COLUMN_USAGE` kcu ON (
+                FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+                INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu ON (
                 tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME AND
                 kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA AND kcu.TABLE_NAME = tc.TABLE_NAME
                 )
@@ -475,17 +513,20 @@ class Table extends DBComponent
         }
 
         foreach ($info['index'] as $index) {
-            $name = $index['Key_name'];
+            if ($index['CONSTRAINT_TYPE'] == 'FOREIGN KEY') {
+                continue;
+            }
+            $name = $index['CONSTRAINT_NAME'];
 
             $type = Index::TYPE_INDEX;
             if ($name == 'PRIMARY') {
                 $name = null;
                 $type = Index::TYPE_PRIMARY;
-            } else if (boolval($index['Non_unique']) != false) {
+            } else if ($index['CONSTRAINT_TYPE'] == 'UNIQUE') {
                 $type = Index::TYPE_UNIQUE;
             }
             // $type = Index::TYPE_FULLTEXT;
-            $columns = [$index['Column_name']];
+            $columns = explode(",", $index['COLUMN_NAME']);
 
             $table->addIndex($name, $columns, $type, true);
         }

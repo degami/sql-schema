@@ -15,6 +15,9 @@ class Index extends DBComponent
     /** @var string */
     private $name;
 
+    /** @var Table */
+    private $table;
+
     /** @var string */
     private $type;
 
@@ -26,10 +29,11 @@ class Index extends DBComponent
      * @param  string[]|string
      * @param  string
      */
-    public function __construct($name, $columns = [], $type = self::TYPE_INDEX, $existing_on_db = false)
+    public function __construct($name, $table, $columns = [], $type = self::TYPE_INDEX, $existing_on_db = false)
     {
         $this->name = $name;
-        $this->setType($type);
+        $this->table = $table;
+        $this->type = $type;
 
         if (!is_array($columns)) {
             $columns = [$columns];
@@ -116,5 +120,14 @@ class Index extends DBComponent
         }
         $output .= '('. implode(', ', $indexcols) .')';
         return $output;
+    }
+
+    public function showAlter()
+    {
+        if ($this->isDeleted()) {
+            return 'DROP INDEX '.$this->getName() . ' ON '.$this->getTable()->getName().';';
+        } else if (!$this->isExistingOnDb()) {
+        } else {
+        }
     }
 }

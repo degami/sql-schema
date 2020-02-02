@@ -15,6 +15,9 @@ class ForeignKey extends DBComponent
     /** @var string */
     private $name;
 
+    /** @var Table */
+    private $table;
+
     /** @var string[] */
     private $columns = [];
 
@@ -32,14 +35,16 @@ class ForeignKey extends DBComponent
 
     /**
      * @param  string
+     * @param  Table
      * @param  string[]|string
      * @param  string
      * @param  string[]|string
      */
-    public function __construct($name, $columns, $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT, $existing_on_db = false)
+    public function __construct($name, $table, $columns, $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT, $existing_on_db = false)
     {
         $this->name = $name;
-        $this->setTargetTable($targetTable);
+        $this->table = $table;
+        $this->targetTable = $targetTable;
 
         if (!is_array($columns)) {
             $columns = [$columns];
@@ -202,5 +207,14 @@ class ForeignKey extends DBComponent
             $output .= ' ON DELETE ' . $this->getOnUpdateAction() . ' ';
         }
         return $output;
+    }
+
+    public function showAlter()
+    {
+        if ($this->isDeleted()) {
+            return 'ALTER TABLE '.$this->getTable()->getName() . ' DROP FOREIGN KEY' . $this->getName() . ';';
+        } else if (!$this->isExistingOnDb()) {
+        } else {
+        }
     }
 }

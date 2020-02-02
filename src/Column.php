@@ -12,6 +12,9 @@ class Column extends DBComponent
     /** @var string */
     private $name;
 
+    /** @var Table */
+    private $table;
+
     /** @var string */
     private $type;
 
@@ -39,18 +42,18 @@ class Column extends DBComponent
      * @param  array|string|NULL
      * @param  array  [OPTION => VALUE, OPTION2]
      */
-    public function __construct($name, $type, array $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
+    public function __construct($name, $table, $type, array $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
     {
         $this->name = $name;
-        $this->setType($type);
+        $this->table = $table;
+        $this->type = $type;
         $this->setParameters($parameters);
         $this->setOptions($options);
-        $this->setNullable($nullable);
-        $this->setDefaultValue($default);
+        $this->nullable = $nullable;
+        $this->defaultValue = $default;
 
         $this->isExistingOnDb(boolval($existing_on_db));
     }
-
 
     /**
      * @return string
@@ -279,5 +282,16 @@ class Column extends DBComponent
         $output .= (trim($this->getComment()) != '' ? ' COMMENT \''.$this->getComment().'\'' : '');
 
         return $output;
+    }
+
+    public function showAlter()
+    {
+        if ($this->isDeleted()) {
+            return "DROP COLUMN ".$this->getName();
+        } else if (!$this->isExistingOnDb()) {
+            return "ADD ".$this->render();
+        } else {
+            return "MODIFY ".$this->render();
+        }
     }
 }
