@@ -3,9 +3,9 @@
 namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\OutOfRangeException;
-use Degami\SqlSchema\Abstracts\DBComponent;
+use Degami\SqlSchema\Abstracts\DBTableComponent;
 
-class ForeignKey extends DBComponent
+class ForeignKey extends DBTableComponent
 {
     const ACTION_RESTRICT = 'RESTRICT';
     const ACTION_NO_ACTION = 'NO ACTION';
@@ -14,9 +14,6 @@ class ForeignKey extends DBComponent
 
     /** @var string */
     private $name;
-
-    /** @var Table */
-    private $table;
 
     /** @var string[] */
     private $columns = [];

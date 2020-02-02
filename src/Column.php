@@ -2,18 +2,15 @@
 
 namespace Degami\SqlSchema;
 
-use Degami\SqlSchema\Abstracts\DBComponent;
+use Degami\SqlSchema\Abstracts\DBTableComponent;
 
-class Column extends DBComponent
+class Column extends DBTableComponent
 {
     const OPTION_UNSIGNED = 'UNSIGNED';
     const OPTION_ZEROFILL = 'ZEROFILL';
 
     /** @var string */
     private $name;
-
-    /** @var Table */
-    private $table;
 
     /** @var string */
     private $type;

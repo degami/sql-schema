@@ -3,9 +3,9 @@
 namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\OutOfRangeException;
-use Degami\SqlSchema\Abstracts\DBComponent;
+use Degami\SqlSchema\Abstracts\DBTableComponent;
 
-class Index extends DBComponent
+class Index extends DBTableComponent
 {
     const TYPE_INDEX = 'INDEX';
     const TYPE_PRIMARY = 'PRIMARY';
@@ -14,9 +14,6 @@ class Index extends DBComponent
 
     /** @var string */
     private $name;
-
-    /** @var Table */
-    private $table;
 
     /** @var string */
     private $type;
