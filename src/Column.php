@@ -47,8 +47,23 @@ class Column extends DBComponent
         $this->name = $name;
         $this->table = $table;
         $this->type = $type;
-        $this->setParameters($parameters);
-        $this->setOptions($options);
+
+        if ($parameters === null) {
+            $parameters = [];
+        } elseif (!is_array($parameters)) {
+            $parameters = [$parameters];
+        }
+
+        $this->parameters = $parameters;
+
+        foreach ($options as $k => $v) {
+            if (is_int($k)) {
+                $this->options[$v] = null;
+            } else {
+                $this->options[$k] = $v;
+            }
+        }
+
         $this->nullable = $nullable;
         $this->defaultValue = $default;
 

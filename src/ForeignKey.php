@@ -50,18 +50,13 @@ class ForeignKey extends DBComponent
             $columns = [$columns];
         }
 
-        foreach ($columns as $column) {
-            $this->addColumn($column);
-        }
+        $this->columns = $columns;
 
         if (!is_array($targetColumns)) {
             $targetColumns = [$targetColumns];
         }
 
-        foreach ($targetColumns as $targetColumn) {
-            $this->addTargetColumn($targetColumn);
-        }
-
+        $this->targetColumns = $targetColumns;
         $this->onUpdateAction = $onUpdateAction;
         $this->onDeleteAction = $onDeleteAction;
 
@@ -83,6 +78,7 @@ class ForeignKey extends DBComponent
     public function addColumn($column)
     {
         $this->columns[] = $column;
+        $this->isModified(true);
         return $this;
     }
 

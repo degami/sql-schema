@@ -39,9 +39,13 @@ class Index extends DBComponent
             $columns = [$columns];
         }
 
-        foreach ($columns as $column) {
-            $this->addColumn($column, boolval($existing_on_db));
+        foreach ($columns as &$column) {
+            if (!($column instanceof IndexColumn)) {
+                $column = new IndexColumn($column, IndexColumn::ASC, null, boolval($existing_on_db));
+            }
         }
+
+        $this->columns = $columns;
 
         $this->isExistingOnDb(boolval($existing_on_db));
     }
