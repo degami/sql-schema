@@ -125,7 +125,7 @@ class Index extends DBTableComponent
 
     public function showAlter()
     {
-        if ($this->isDeleted()) {
+        if ($this->isExistingOnDb() && $this->isDeleted()) {
             return 'DROP INDEX '.$this->getName() . ' ON '.$this->getTable()->getName().';';
         } else if (!$this->isExistingOnDb()) {
         } else {

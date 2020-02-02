@@ -142,7 +142,7 @@ class Table extends DBComponent
             $column = $name;
             $name = $column->getName();
         } else {
-            $column = new Column($name, $this, $type, $parameters, $options, $nullable, $default);
+            $column = new Column($name, $this, $type, $parameters, $options, $nullable, $default, $existing_on_db);
         }
 
         if (isset($this->columns[$name])) {
@@ -150,7 +150,9 @@ class Table extends DBComponent
         }
 
         $this->columns[$name] = $column;
-        $this->isModified(true);
+        if (!$existing_on_db) {
+            $this->isModified(true);
+        }
         return $this;
     }
 
@@ -211,7 +213,9 @@ class Table extends DBComponent
         }
 
         $this->indexes[$name] = $index;
-        $this->isModified(true);
+        if (!$existing_on_db) {
+            $this->isModified(true);
+        }
         return $this;
     }
 
@@ -421,7 +425,7 @@ class Table extends DBComponent
             $columns[] = $column->showAlter();
         }
 
-        $out .= implode(",", $columns);
+        $out .= implode(",\n", $columns);
         $out .= ';';
 
         foreach ($this->getIndexes() as $key => $index) {
@@ -478,7 +482,7 @@ class Table extends DBComponent
             $info[$index] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         }
 
-        $table = new static($tablename);
+        $table = new static($tablename, true);
 
         foreach ($info['fields'] as $field) {
             $name = $field['Field'];

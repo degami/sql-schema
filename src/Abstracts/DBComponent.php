@@ -5,13 +5,13 @@ namespace Degami\SqlSchema\Abstracts;
 abstract class DBComponent
 {
     /** @var boolean */
-    protected $existing_on_db;
+    protected $existing_on_db = false;
 
     /** @var boolean */
-    protected $modified;
+    protected $modified = false;
 
     /** @var boolean */
-    protected $deleted;
+    protected $deleted = false;
 
 
     /**
