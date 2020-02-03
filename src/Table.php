@@ -258,16 +258,18 @@ class Table extends DBComponent
      * @param string $columnName
      * @return self
      */
-    public function setAutoIncrementColumn($columnName)
+    public function setAutoIncrementColumn($columnName, $set_modified = true)
     {
         if ($this->getColumn($columnName) == null) {
             throw new EmptyException("Column not found", 1);
         }
         foreach ($this->getColumns() as $key => &$colum) {
-            $colum->setAutoIncrement(false);
+            $colum->setAutoIncrement(false, $set_modified);
         }
-        $this->getColumn($columnName)->setAutoIncrement(true);
-        $this->isModified(true);
+        $this->getColumn($columnName)->setAutoIncrement(true, $set_modified);
+        if ($set_modified) {
+            $this->isModified(true);
+        }
         return $this;
     }
 
@@ -419,21 +421,41 @@ class Table extends DBComponent
 
     public function showAlter()
     {
-        $out = "ALTER TABLE ".$this->getName()." ";
         $columns = [];
         foreach ($this->getColumns() as $key => $column) {
             $columns[] = $column->showAlter();
         }
 
-        $out .= implode(",\n", $columns);
-        $out .= ';';
+        $out = '';
 
-        foreach ($this->getIndexes() as $key => $index) {
-            $out .= $index->showAlter();
+        $columns = array_filter($columns);
+        if (count($columns)) {
+            $out = "ALTER TABLE ".$this->getName()." ";
+            $out .= implode(",\n", $columns);
+            $out .= ';';
+            $out .= "\n";
         }
 
+        $indexes = [];
+        foreach ($this->getIndexes() as $key => $index) {
+            $indexes[] = $index->showAlter();
+        }
+        $indexes = array_filter($indexes);
+        if (count($indexes)) {
+            $out .= implode("\n", $indexes);
+            $out .= ';';
+            $out .= "\n";
+        }
+
+        $foreigns = [];
         foreach ($this->getForeignKeys() as $key => $foreign) {
-            $out .= $foreign->showAlter();
+            $foreigns[] = $foreign->showAlter();
+        }
+        $foreigns = array_filter($foreigns);
+        if (count($foreigns)) {
+            $out .= implode("\n", $foreigns);
+            $out .= ';';
+            $out .= "\n";
         }
 
         return $out;
@@ -512,7 +534,7 @@ class Table extends DBComponent
             $table->addColumn($name, $type, $parameters, $options, $nullable, $default, true);
 
             if ($field['Extra'] == 'auto_increment') {
-                $table->setAutoIncrementColumn($name);
+                $table->setAutoIncrementColumn($name, false);
             }
         }
 

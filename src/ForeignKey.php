@@ -207,6 +207,7 @@ class ForeignKey extends DBTableComponent
         if ($this->isExistingOnDb() && $this->isDeleted()) {
             return 'ALTER TABLE '.$this->getTable()->getName() . ' DROP FOREIGN KEY' . $this->getName() . ';';
         } else if (!$this->isExistingOnDb()) {
+            return 'ALTER TABLE '.$this->getTable()->getName() . ' ADD '. $this->render();
         } else {
         }
     }

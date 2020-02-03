@@ -128,6 +128,9 @@ class Index extends DBTableComponent
         if ($this->isExistingOnDb() && $this->isDeleted()) {
             return 'DROP INDEX '.$this->getName() . ' ON '.$this->getTable()->getName().';';
         } else if (!$this->isExistingOnDb()) {
+            if ($this->getType() != 'PRIMARY') {
+                return "CREATE " . $this->render();
+            }
         } else {
         }
     }

@@ -200,10 +200,12 @@ class Column extends DBTableComponent
      * @param  bool
      * @return self
      */
-    public function setAutoIncrement($autoIncrement = true)
+    public function setAutoIncrement($autoIncrement = true, $set_modified = true)
     {
         $this->autoIncrement = $autoIncrement;
-        $this->isModified(true);
+        if ($set_modified) {
+            $this->isModified(true);
+        }
         return $this;
     }
 
@@ -302,8 +304,10 @@ class Column extends DBTableComponent
             return "DROP COLUMN ".$this->getName();
         } else if (!$this->isExistingOnDb()) {
             return "ADD ".$this->render();
-        } else {
+        } else if ($this->isModified()) {
             return "MODIFY ".$this->render();
         }
+
+        return "";
     }
 }
