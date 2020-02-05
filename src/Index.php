@@ -131,7 +131,10 @@ class Index extends DBTableComponent
             if ($this->getType() != 'PRIMARY') {
                 return "CREATE " . $this->render();
             }
-        } else {
+        } else if ($this->isModified() && $this->getType() != 'PRIMARY') {
+            return
+                "DROP INDEX ".$this->getName() . " ON ".$this->getTable()->getName().";\n".
+                "CREATE " . $this->render();
         }
     }
 }

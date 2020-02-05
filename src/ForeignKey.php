@@ -205,10 +205,13 @@ class ForeignKey extends DBTableComponent
     public function showAlter()
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
-            return 'ALTER TABLE '.$this->getTable()->getName() . ' DROP FOREIGN KEY' . $this->getName() . ';';
+            return 'ALTER TABLE '.$this->getTable()->getName() . ' DROP FOREIGN KEY ' . $this->getName() . ';';
         } else if (!$this->isExistingOnDb()) {
             return 'ALTER TABLE '.$this->getTable()->getName() . ' ADD '. $this->render();
-        } else {
+        } else if ($this->isModified()) {
+            return
+                "ALTER TABLE ".$this->getTable()->getName() . " DROP FOREIGN KEY " . $this->getName() . ";\n".
+                "ALTER TABLE ".$this->getTable()->getName() . " ADD ". $this->render();
         }
     }
 }
