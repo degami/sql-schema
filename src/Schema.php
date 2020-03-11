@@ -17,14 +17,16 @@ class Schema
     private $pdo;
 
 
-    public function __construct($pdo = null)
+    public function __construct($pdo = null, $preload = false)
     {
         $this->pdo = $pdo;
 
         if ($this->pdo instanceof \PDO) {
             $this->name = $pdo->query('SELECT DATABASE()')->fetchColumn();
-            foreach ($pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN) as $key => $tablename) {
-                $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
+            if ($preload) {
+                foreach ($pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN) as $key => $tablename) {
+                    $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
+                }
             }
         }
     }
@@ -63,17 +65,16 @@ class Schema
     * @param  string
     * @return Table|NULL
     */
-    public function getTable($name, $pdo = null)
+    public function getTable($tablename)
     {
-        if (isset($this->tables[$name])) {
-            return $this->tables[$name];
+        if (isset($this->tables[$tablename])) {
+            return $this->tables[$tablename];
         }
 
-        if ($pdo instanceof \PDO) {
-            $dbname = $pdo->query('SELECT DATABASE()')->fetchColumn();
-            $this->addTable(Table::readFromExisting($dbname, $name, $pdo));
+        if ($this->pdo instanceof \PDO) {
+            $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
 
-            return $this->tables[$name];
+            return $this->tables[$tablename];
         }
 
         throw new OutOfRangeException("Table not found");
