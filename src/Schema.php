@@ -22,9 +22,9 @@ class Schema
         $this->pdo = $pdo;
 
         if ($this->pdo instanceof \PDO) {
-            $dbname = $pdo->query('SELECT DATABASE()')->fetchColumn();
+            $this->name = $pdo->query('SELECT DATABASE()')->fetchColumn();
             foreach ($pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN) as $key => $tablename) {
-                $this->addTable(Table::readFromExisting($dbname, $tablename, $pdo));
+                $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
             }
         }
     }
@@ -63,13 +63,20 @@ class Schema
     * @param  string
     * @return Table|NULL
     */
-    public function getTable($name)
+    public function getTable($name, $pdo = null)
     {
         if (isset($this->tables[$name])) {
             return $this->tables[$name];
         }
 
-        throw new OutOfRangeException("Column not found");
+        if ($pdo instanceof \PDO) {
+            $dbname = $pdo->query('SELECT DATABASE()')->fetchColumn();
+            $this->addTable(Table::readFromExisting($dbname, $name, $pdo));
+
+            return $this->tables[$name];
+        }
+
+        throw new OutOfRangeException("Table not found");
     }
 
    /**
