@@ -478,7 +478,7 @@ class Table extends DBComponent
                 kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA AND kcu.TABLE_NAME = tc.TABLE_NAME
                 )
                 WHERE tc.TABLE_SCHEMA = '{$dbname}' AND tc.`TABLE_NAME` LIKE '{$tablename}'
-                GROUP BY tc.CONSTRAINT_NAME",
+                GROUP BY tc.CONSTRAINT_NAME, tc.CONSTRAINT_TYPE",
             'refs' => "SELECT
                 kcu.TABLE_NAME,
                 GROUP_CONCAT(kcu.COLUMN_NAME) AS COLUMN_NAME,
@@ -493,7 +493,7 @@ class Table extends DBComponent
                 kcu.TABLE_SCHEMA = rc.UNIQUE_CONSTRAINT_SCHEMA AND kcu.TABLE_NAME = rc.TABLE_NAME
                 )
                 WHERE kcu.REFERENCED_TABLE_SCHEMA = '{$dbname}' AND kcu.TABLE_NAME = '{$tablename}'
-                GROUP BY kcu.CONSTRAINT_NAME",
+                GROUP BY kcu.CONSTRAINT_NAME, kcu.REFERENCED_TABLE_NAME, rc.UPDATE_RULE, rc.DELETE_RULE",
         ];
 
         $info = [];

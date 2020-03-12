@@ -21,14 +21,37 @@ class Schema
     {
         $this->pdo = $pdo;
 
+        $this->init($preload);
+    }
+
+    private function init($preload)
+    {
+        $this->tables = [];
+
         if ($this->pdo instanceof \PDO) {
-            $this->name = $pdo->query('SELECT DATABASE()')->fetchColumn();
+            $this->name = $this->pdo->query('SELECT DATABASE()')->fetchColumn();
             if ($preload) {
-                foreach ($pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN) as $key => $tablename) {
-                    $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
-                }
+                $this->preload();
             }
         }
+
+        return $this;
+    }
+
+    public function preload()
+    {
+        if ($this->pdo instanceof \PDO) {
+            foreach ($this->pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN) as $key => $tablename) {
+                $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
+            }
+        }
+
+        return $this;
+    }
+
+    public function reset($preload = false)
+    {
+        return $this->init($preload);
     }
 
     /**
