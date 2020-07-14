@@ -95,12 +95,17 @@ class Schema
         }
 
         if ($this->pdo instanceof \PDO) {
-            $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
+            $existing = count($this->pdo->query("SHOW TABLES LIKE '$tablename'")->fetchAll(\PDO::FETCH_COLUMN)) > 0;
+            if ($existing) {
+                $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
+            } else {
+                $this->addTable($tablename);
+            }
 
             return $this->tables[$tablename];
         }
 
-        throw new OutOfRangeException("Table not found");
+        throw new OutOfRangeException("Table '$tablename' not found");
     }
 
    /**
