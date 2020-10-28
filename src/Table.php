@@ -403,11 +403,21 @@ class Table extends DBComponent
         return $out;
     }
 
+    /**
+     * shows drop sql query
+     *
+     * @return string
+     */
     public function showDrop()
     {
         return "DROP TABLE ".$this->getName().";";
     }
 
+    /**
+     * shows migration query
+     *
+     * @return string
+     */
     public function migrate()
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
@@ -419,6 +429,11 @@ class Table extends DBComponent
         }
     }
 
+    /**
+     * shows alter query
+     *
+     * @return string
+     */
     public function showAlter()
     {
         $columns = [];
@@ -461,6 +476,16 @@ class Table extends DBComponent
         return $out;
     }
 
+    /**
+     * read table structure from db
+     *
+     * @param $dbname
+     * @param $tablename
+     * @param $pdo
+     * @return static
+     * @throws DuplicateException
+     * @throws EmptyException
+     */
     public static function readFromExisting($dbname, $tablename, $pdo)
     {
         $sql_queries = [
@@ -567,5 +592,86 @@ class Table extends DBComponent
         }
 
         return $table;
+    }
+
+    /**
+     * add primary key helper function
+     *
+     * @param $name
+     * @return $this
+     * @throws DuplicateException
+     * @throws EmptyException
+     */
+    public function addPrimaryKey($name)
+    {
+        $this
+            ->addColumn($name, Column::TYPE_INT, null, [Column::OPTION_UNSIGNED], false)
+            ->addIndex(null, $name, Index::TYPE_PRIMARY)
+            ->setAutoIncrementColumn($name);
+
+        return $this;
+    }
+
+    /**
+     * add varchar column helper function
+     *
+     * @param $name
+     * @param $length
+     * @return $this
+     * @throws DuplicateException
+     */
+    public function addVarcharCol($name, $length)
+    {
+        $this->addColumn($name, Column::TYPE_VARCHAR, [$length]);
+
+        return $this;
+    }
+
+    /**
+     * add int column helper function
+     *
+     * @param $name
+     * @param bool $unsigned
+     * @return $this
+     * @throws DuplicateException
+     */
+    public function addIntCol($name, $unsigned = true)
+    {
+        $options = null;
+        if ($unsigned == true) {
+            $options = [Column::OPTION_UNSIGNED];
+        }
+
+        $this->addColumn($name, Column::TYPE_INT, null, $options);
+
+        return $this;
+    }
+
+    /**
+     * add text column helper function
+     *
+     * @param $name
+     * @return $this
+     * @throws DuplicateException
+     */
+    public function addTextCol($name)
+    {
+        $this->addColumn($name, Column::TYPE_TEXT, null);
+
+        return $this;
+    }
+
+    /**
+     * add timestamp column function
+     *
+     * @param $name
+     * @return $this
+     * @throws DuplicateException
+     */
+    public function addTimestampCol($name)
+    {
+        $this->addColumn($name, 'TIMESTAMP', null, [], false, 'CURRENT_TIMESTAMP()');
+
+        return $this;
     }
 }
