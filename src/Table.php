@@ -10,84 +10,84 @@ use Degami\SqlSchema\Abstracts\DBComponent;
 class Table extends DBComponent
 {
     /**
-    * @var string
-    */
+     * @var string
+     */
     private $name;
 
     /**
-    * @var string|NULL
-    */
+     * @var string|NULL
+     */
     private $comment;
 
     /**
-    * @var array  [name => Column]
-    */
+     * @var array  [name => Column]
+     */
     private $columns = [];
 
     /**
-    * @var array  [name => Index]
-    */
+     * @var array  [name => Index]
+     */
     private $indexes = [];
 
     /**
-    * @var array  [name => ForeignKey]
-    */
+     * @var array  [name => ForeignKey]
+     */
     private $foreignKeys = [];
 
     /**
-    * @var array  [name => value]
-    */
+     * @var array  [name => value]
+     */
     private $options = [];
 
     /**
-    * @var string storage engine
-    */
+     * @var string storage engine
+     */
     private $storageEngine = null;
 
     /**
-    * @param string
-    */
+     * @param string
+     */
     public function __construct($name, $existing_on_db = false)
     {
         $this->name = $name;
         $this->isExistingOnDb(boolval($existing_on_db));
     }
 
-   /**
-    * get Name
-    * @return string
-    */
+    /**
+     * get Name
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
-   /**
-    * set Comment
-    * @param string $comment
-    * @return  self
-    */
+    /**
+     * set Comment
+     * @param string $comment
+     * @return  self
+     */
     public function setComment($comment)
     {
         $this->comment = $comment;
         return $this;
     }
 
-   /**
-    * get Comment
-    * @return string
-    */
+    /**
+     * get Comment
+     * @return string
+     */
     public function getComment()
     {
         return $this->comment;
     }
 
-   /**
-    * set Option
-    * @param string $name
-    * @param string $value
-    * @return self
-    */
+    /**
+     * set Option
+     * @param string $name
+     * @param string $value
+     * @return self
+     */
     public function setOption($name, $value)
     {
         $this->options[$name] = $value;
@@ -95,10 +95,10 @@ class Table extends DBComponent
         return $this;
     }
 
-   /**
-    * get Options
-    * @return array
-    */
+    /**
+     * get Options
+     * @return array
+     */
     public function getOptions()
     {
         return $this->options;
@@ -126,12 +126,12 @@ class Table extends DBComponent
 
     /**
      * add Column
-     * @param string  $name
-     * @param string  $type
-     * @param mixed   $parameters
-     * @param array   $options
+     * @param string $name
+     * @param string $type
+     * @param mixed $parameters
+     * @param array $options
      * @param boolean $nullable
-     * @param mixed   $default
+     * @param mixed $default
      * @return self
      */
     public function addColumn($name, $type = null, $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
@@ -156,6 +156,23 @@ class Table extends DBComponent
         return $this;
     }
 
+    /**
+     * moves a Column after another
+     *
+     * @param $name
+     * @param $after
+     * @return $this
+     * @throws OutOfRangeException
+     */
+    public function moveColumn($name, $after)
+    {
+        if ($this->getColumn($name) && $this->getColumn($after)) {
+            $this->getColumn($name)->setColumnPosition($after)->isModified(true);
+        }
+
+        return $this;
+    }
+
    /**
     * deletes Column
     * @param  string $name
@@ -167,18 +184,20 @@ class Table extends DBComponent
         return $this;
     }
 
-   /**
-    * get Column
-    * @param  string $name
-    * @return Column|null
-    */
+    /**
+     * get Column
+     *
+     * @param $name
+     * @return Column|null
+     * @throws OutOfRangeException
+     */
     public function getColumn($name)
     {
         if (isset($this->columns[$name])) {
             return $this->columns[$name];
         }
 
-        throw new OutOfRangeException("Column not found");
+        throw new OutOfRangeException("Column `{$name}` not found in table `{$this->name}`");
     }
 
     /**
@@ -267,9 +286,8 @@ class Table extends DBComponent
             $colum->setAutoIncrement(false, $set_modified);
         }
         $this->getColumn($columnName)->setAutoIncrement(true, $set_modified);
-        if ($set_modified) {
-            $this->isModified(true);
-        }
+        $this->isModified($set_modified);
+
         return $this;
     }
 
@@ -279,7 +297,7 @@ class Table extends DBComponent
     * @param array  $columns
     * @param string $targetTable
     * @param array  $targetColumns
-    * @return ForeignKey
+    * @return self
     */
     public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT, $existing_on_db = false)
     {
@@ -334,11 +352,12 @@ class Table extends DBComponent
         return $this->foreignKeys;
     }
 
-   /**
-    * validate
-    * @throws Exception
-    * @return void
-    */
+    /**
+     * validate
+     *
+     * @throws DuplicateException
+     * @throws EmptyException
+     */
     public function validate()
     {
         $tableName = $this->getName();
@@ -361,6 +380,7 @@ class Table extends DBComponent
 
    /**
     * show Create
+    *
     * @return string
     */
     public function showCreate()

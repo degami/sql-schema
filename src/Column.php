@@ -190,6 +190,21 @@ class Column extends DBTableComponent
     }
 
     /**
+     * return data types by section
+     *
+     * @param $section
+     * @return string[]|null
+     */
+    public function getDataTypes($section)
+    {
+        if (in_array($section, ['numeric', 'string', 'datetime'])) {
+            return $this->dataTypes[$section];
+        }
+
+        return null;
+    }
+
+    /**
      * @return string
      */
     public function getType()
@@ -295,9 +310,8 @@ class Column extends DBTableComponent
     public function setAutoIncrement($autoIncrement = true, $set_modified = true)
     {
         $this->autoIncrement = $autoIncrement;
-        if ($set_modified) {
-            $this->isModified(true);
-        }
+        $this->isModified($set_modified);
+
         return $this;
     }
 
@@ -310,7 +324,7 @@ class Column extends DBTableComponent
     }
 
     /**
-     * @param  scalar|NULL
+     * @param  mixed|NULL
      * @return self
      */
     public function setDefaultValue($defaultValue = null)
@@ -327,7 +341,7 @@ class Column extends DBTableComponent
     }
 
     /**
-     * @return scalar|NULL
+     * @return mixed|NULL
      */
     public function getDefaultValue()
     {
