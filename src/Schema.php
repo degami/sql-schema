@@ -4,6 +4,7 @@ namespace Degami\SqlSchema;
 
 use Degami\SqlSchema\Exceptions\DuplicateException;
 use Degami\SqlSchema\Exceptions\OutOfRangeException;
+use PDO;
 
 class Schema
 {
@@ -13,10 +14,18 @@ class Schema
     /** @var array  [name => Table] */
     private $tables = [];
 
-    /** @var \PDO|null */
+    /** @var PDO|null */
     private $pdo;
 
-
+    /**
+     * Schema constructor.
+     *
+     * @param PDO|null $pdo
+     * @param bool $preload
+     * @throws DuplicateException
+     * @throws Exceptions\EmptyException
+     * @throws OutOfRangeException
+     */
     public function __construct($pdo = null, $preload = false)
     {
         $this->pdo = $pdo;
@@ -24,11 +33,18 @@ class Schema
         $this->init($preload);
     }
 
-    private function init($preload)
+    /**
+     * @param bool $preload
+     * @return self
+     * @throws DuplicateException
+     * @throws Exceptions\EmptyException
+     * @throws OutOfRangeException
+     */
+    private function init(bool $preload): Schema
     {
         $this->tables = [];
 
-        if ($this->pdo instanceof \PDO) {
+        if ($this->pdo instanceof PDO) {
             $this->name = $this->pdo->query('SELECT DATABASE()')->fetchColumn();
             if ($preload) {
                 $this->preload();
@@ -38,35 +54,57 @@ class Schema
         return $this;
     }
 
-    public function preload()
+    /**
+     * preloads database state
+     *
+     * @return self
+     * @throws DuplicateException
+     * @throws Exceptions\EmptyException
+     * @throws OutOfRangeException
+     */
+    public function preload(): Schema
     {
-        if ($this->pdo instanceof \PDO) {
-            foreach ($this->pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN) as $key => $tablename) {
-                $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
+        if ($this->pdo instanceof PDO) {
+            foreach ($this->pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN) as $key => $table_name) {
+                $this->addTable(Table::readFromExisting($this->name, $table_name, $this->pdo));
             }
         }
 
         return $this;
     }
 
-    public function reset($preload = false)
+    /**
+     * resets data
+     *
+     * @param false $preload
+     * @return self
+     * @throws DuplicateException
+     * @throws Exceptions\EmptyException
+     * @throws OutOfRangeException
+     */
+    public function reset($preload = false): Schema
     {
         return $this->init($preload);
     }
 
     /**
+     * gets schema name
+     *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-    * @param  string|Table
-    * @return Table
-    */
-    public function addTable($name)
+     * adds a table
+     *
+     * @param string|Table $name
+     * @return Table
+     * @throws DuplicateException
+     */
+    public function addTable($name): Table
     {
         $table = null;
 
@@ -85,44 +123,55 @@ class Schema
     }
 
     /**
-    * @param  string
-    * @return Table|NULL
-    */
-    public function getTable($tablename)
+     * gets a table
+     *
+     * @param string $table_name
+     * @return Table|NULL
+     * @throws DuplicateException
+     * @throws Exceptions\EmptyException
+     * @throws OutOfRangeException
+     */
+    public function getTable(string $table_name): ?Table
     {
-        if (isset($this->tables[$tablename])) {
-            return $this->tables[$tablename];
+        if (isset($this->tables[$table_name])) {
+            return $this->tables[$table_name];
         }
 
-        if ($this->pdo instanceof \PDO) {
-            $existing = count($this->pdo->query("SHOW TABLES LIKE '$tablename'")->fetchAll(\PDO::FETCH_COLUMN)) > 0;
+        if ($this->pdo instanceof PDO) {
+            $existing = count($this->pdo->query("SHOW TABLES LIKE '$table_name'")->fetchAll(PDO::FETCH_COLUMN)) > 0;
             if ($existing) {
-                $this->addTable(Table::readFromExisting($this->name, $tablename, $this->pdo));
+                $this->addTable(Table::readFromExisting($this->name, $table_name, $this->pdo));
             } else {
-                $this->addTable($tablename);
+                $this->addTable($table_name);
             }
 
-            return $this->tables[$tablename];
+            return $this->tables[$table_name];
         }
 
-        throw new OutOfRangeException("Table '$tablename' not found");
+        throw new OutOfRangeException("Table '$table_name' not found");
     }
 
-   /**
-    * deletes Table
-    * @param  string $name
-    * @return self
-    */
-    public function deleteTable($name)
+    /**
+     * deletes a table
+     *
+     * @param string $name
+     * @return self
+     * @throws DuplicateException
+     * @throws Exceptions\EmptyException
+     * @throws OutOfRangeException
+     */
+    public function deleteTable(string $name): Schema
     {
         $this->getTable($name)->isDeleted(true);
         return $this;
     }
 
     /**
+     * gets defined tables
+     *
     * @return Table[]
     */
-    public function getTables()
+    public function getTables(): array
     {
         return $this->tables;
     }

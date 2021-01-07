@@ -101,24 +101,31 @@ class Column extends DBTableComponent
     private $nullable = true;
 
     /** @var bool */
-    private $autoIncrement = false;
+    private $auto_increment = false;
 
     /** @var mixed|NULL */
-    private $defaultValue;
+    private $default_value;
 
     /** @var string|NULL */
     private $comment;
 
     /** @var null  */
-    private $columnPosition = self::POSITION_LAST;
+    private $column_position = self::POSITION_LAST;
 
     /**
-     * @param  string
-     * @param  string|NULL
-     * @param  array|string|NULL
-     * @param  array  [OPTION => VALUE, OPTION2]
+     * Column constructor.
+     *
+     * @param string $name
+     * @param Table $table
+     * @param string $type
+     * @param array|null $parameters
+     * @param array $options
+     * @param bool $nullable
+     * @param null $default
+     * @param false $existing_on_db
+     * @throws OutOfRangeException
      */
-    public function __construct($name, $table, $type, array $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
+    public function __construct(string $name, Table $table, string $type, array $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
     {
         $this->name = $name;
         $this->table = $table;
@@ -165,24 +172,28 @@ class Column extends DBTableComponent
         }
 
         $this->nullable = $nullable;
-        $this->defaultValue = $default;
+        $this->default_value = $default;
 
         $this->isExistingOnDb(boolval($existing_on_db));
     }
 
     /**
+     * gets column name
+     *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param  string
+     * set column type
+     *
+     * @param string $type
      * @return self
      */
-    public function setType($type)
+    public function setType(string $type): Column
     {
         $this->type = $type;
         $this->isModified(true);
@@ -195,7 +206,7 @@ class Column extends DBTableComponent
      * @param $section
      * @return string[]|null
      */
-    public function getDataTypes($section)
+    public function getDataTypes($section): ?array
     {
         if (in_array($section, ['numeric', 'string', 'datetime'])) {
             return $this->dataTypes[$section];
@@ -205,18 +216,22 @@ class Column extends DBTableComponent
     }
 
     /**
+     * gets column type
+     *
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
     /**
+     * sets column parameters
+     *
      * @param  string|array|NULL
      * @return self
      */
-    public function setParameters($parameters)
+    public function setParameters($parameters): Column
     {
         if ($parameters === null) {
             $parameters = [];
@@ -230,19 +245,23 @@ class Column extends DBTableComponent
     }
 
     /**
+     * gets column parameters
+     *
      * @return array
      */
-    public function getParameters()
+    public function getParameters(): ?array
     {
         return $this->parameters;
     }
 
     /**
-     * @param  string
-     * @param  scalar|NULL
+     * adds column option
+     *
+     * @param string $option
+     * @param scalar|NULL $value
      * @return self
      */
-    public function addOption($option, $value = null)
+    public function addOption(string $option, $value = null): Column
     {
         $this->options[$option] = $value;
         $this->isModified(true);
@@ -250,10 +269,12 @@ class Column extends DBTableComponent
     }
 
     /**
+     * sets column options
+     *
      * @param  array
      * @return self
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): Column
     {
         $this->options = [];
 
@@ -269,26 +290,33 @@ class Column extends DBTableComponent
     }
 
     /**
+     * gets column options
+     *
      * @return array
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->options;
     }
 
     /**
-     * @return array
+     * check if option is set
+     *
+     * @param string $name
+     * @return bool
      */
-    public function hasOption($name)
+    public function hasOption(string $name): bool
     {
         return array_key_exists($name, $this->options);
     }
 
     /**
-     * @param  bool
+     * sets nullable flag
+     *
+     * @param  bool $nullable
      * @return self
      */
-    public function setNullable($nullable = true)
+    public function setNullable($nullable = true): Column
     {
         $this->nullable = $nullable;
         $this->isModified(true);
@@ -296,71 +324,84 @@ class Column extends DBTableComponent
     }
 
     /**
+     * gets nullable flag
+     *
      * @return bool
      */
-    public function isNullable()
+    public function isNullable(): bool
     {
         return $this->nullable;
     }
 
     /**
-     * @param  bool
+     * sets auto increment flag
+     *
+     * @param bool $auto_increment
+     * @param bool $set_modified
      * @return self
      */
-    public function setAutoIncrement($autoIncrement = true, $set_modified = true)
+    public function setAutoIncrement($auto_increment = true, $set_modified = true): Column
     {
-        $this->autoIncrement = $autoIncrement;
+        $this->auto_increment = $auto_increment;
         $this->isModified($set_modified);
 
         return $this;
     }
 
     /**
+     * gets auto increment flag
+     *
      * @return bool
      */
-    public function isAutoIncrement()
+    public function isAutoIncrement(): bool
     {
-        return $this->autoIncrement;
+        return $this->auto_increment;
     }
 
     /**
+     * sets default value
+     *
      * @param  mixed|NULL
      * @return self
      */
-    public function setDefaultValue($defaultValue = null)
+    public function setDefaultValue($default_value = null): Column
     {
-        if (strtoupper($defaultValue) == 'NULL') {
+        if (strtoupper($default_value) == 'NULL') {
             $this->setNullable(true);
-        } elseif ($defaultValue !== null) {
+        } elseif ($default_value !== null) {
             $this->setNullable(false);
         }
 
-        $this->defaultValue = $defaultValue;
+        $this->default_value = $default_value;
         $this->isModified(true);
         return $this;
     }
 
     /**
+     * gets default value
+     *
      * @return mixed|NULL
      */
-    public function getDefaultValue()
+    public function getDefaultValue(): ?string
     {
-        if ($this->defaultValue != null) {
-            if (strtoupper($this->defaultValue) == 'NULL') {
+        if ($this->default_value != null) {
+            if (strtoupper($this->default_value) == 'NULL') {
                 return 'NULL';
-            } else if (stripos($this->defaultValue, "()")) {
-                return $this->defaultValue;
+            } else if (stripos($this->default_value, "()")) {
+                return $this->default_value;
             }
-            return "'{$this->defaultValue}'";
+            return "'{$this->default_value}'";
         }
         return null;
     }
 
     /**
+     * sets column comment
+     *
      * @param  string|NULL
      * @return self
      */
-    public function setComment($comment)
+    public function setComment($comment): Column
     {
         $this->comment = $comment;
         $this->isModified(true);
@@ -368,9 +409,11 @@ class Column extends DBTableComponent
     }
 
     /**
+     * gets column comment
+     *
      * @return string|NULL
      */
-    public function getComment()
+    public function getComment(): ?string
     {
         return $this->comment;
     }
@@ -381,9 +424,9 @@ class Column extends DBTableComponent
      * @param string|null $position
      * @return $this
      */
-    public function setColumnPosition($position = null)
+    public function setColumnPosition($position = null): Column
     {
-        $this->columnPosition = $position;
+        $this->column_position = $position;
 
         return $this;
     }
@@ -393,23 +436,25 @@ class Column extends DBTableComponent
      *
      * @return string
      */
-    public function getColumnPosition()
+    public function getColumnPosition(): string
     {
-        if ($this->columnPosition == self::POSITION_FIRST) {
+        if ($this->column_position == self::POSITION_FIRST) {
             return ' FIRST';
-        } elseif ($this->columnPosition == self::POSITION_LAST) {
+        } elseif ($this->column_position == self::POSITION_LAST) {
             return '';
-        } elseif (is_string($this->columnPosition) && trim($this->columnPosition) != '') {
-            return " AFTER `{$this->columnPosition}`";
+        } elseif (is_string($this->column_position) && trim($this->column_position) != '') {
+            return " AFTER `{$this->column_position}`";
         }
 
         return '';
     }
 
     /**
+     * gets sql query part
+     *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $output = '`'.$this->getName() . '` ';
         $output .= $this->getType().
@@ -430,7 +475,12 @@ class Column extends DBTableComponent
         return $output;
     }
 
-    public function showAlter()
+    /**
+     * gets alter query part
+     *
+     * @return string
+     */
+    public function showAlter(): string
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
             return "DROP COLUMN ".$this->getName();
@@ -449,7 +499,7 @@ class Column extends DBTableComponent
      * @param $type
      * @return bool
      */
-    protected function validateType($type)
+    protected function validateType($type): bool
     {
         return in_array(trim(strtoupper($type)), array_merge($this->dataTypes['numeric'], $this->dataTypes['string'], $this->dataTypes['datetime']));
     }

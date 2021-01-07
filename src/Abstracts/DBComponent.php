@@ -15,10 +15,12 @@ abstract class DBComponent
 
 
     /**
+     * get/sets is existing on db flag
+     *
      * @param  boolean|null
      * @return boolean
      */
-    public function isExistingOnDb($existing_on_db = null)
+    public function isExistingOnDb($existing_on_db = null): bool
     {
         if ($existing_on_db !== null) {
             $this->existing_on_db = $existing_on_db;
@@ -28,10 +30,12 @@ abstract class DBComponent
     }
 
     /**
+     * gets/sets is modified flag
+     *
      * @param  boolean|null
      * @return boolean
      */
-    public function isModified($modified = null)
+    public function isModified($modified = null): bool
     {
         if ($modified !== null) {
             $this->modified = $modified;
@@ -41,10 +45,12 @@ abstract class DBComponent
     }
 
     /**
+     * gets/sets is deleted flag
+     *
      * @param  boolean|null
      * @return boolean
      */
-    public function isDeleted($deleted = null)
+    public function isDeleted($deleted = null): bool
     {
         if ($deleted !== null) {
             $this->deleted = $deleted;

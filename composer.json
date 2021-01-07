@@ -10,9 +10,10 @@
 	}
 	],
 	"require": {
-		"php": ">=5.5.0",
-		"degami/basics": "dev-master"
-	},
+		"php": ">=7.2",
+		"degami/basics": "dev-master",
+      	"ext-pdo": "*"
+    },
 	"autoload": {
 		"files": [],
 	    "psr-4": {

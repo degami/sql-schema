@@ -21,12 +21,17 @@ class Index extends DBTableComponent
     /** @var IndexColumn[] */
     private $columns = [];
 
+
     /**
-     * @param  string
-     * @param  string[]|string
-     * @param  string
+     * Index constructor.
+     *
+     * @param string|null $name
+     * @param Table $table
+     * @param array $columns
+     * @param string $type
+     * @param false $existing_on_db
      */
-    public function __construct($name, $table, $columns = [], $type = self::TYPE_INDEX, $existing_on_db = false)
+    public function __construct(?string $name, Table $table, $columns = [], $type = self::TYPE_INDEX, $existing_on_db = false)
     {
         $this->name = $name;
         $this->table = $table;
@@ -48,18 +53,23 @@ class Index extends DBTableComponent
     }
 
     /**
-     * @return string
+     * gets index name
+     *
+     * @return string|null
      */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
 
     /**
-     * @param  string
+     * sets type
+     *
+     * @param string $type
      * @return self
+     * @throws OutOfRangeException
      */
-    public function setType($type)
+    public function setType(string $type): Index
     {
         $type = (string) $type;
         $exists = $type === self::TYPE_INDEX
@@ -77,18 +87,23 @@ class Index extends DBTableComponent
     }
 
     /**
+     * gets type
+     *
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
     /**
-     * @param  IndexColumn|string
-     * @return IndexColumn
+     * adds a column
+     *
+     * @param IndexColumn|string
+     * @param null $existing_on_db
+     * @return self
      */
-    public function addColumn($column, $existing_on_db = null)
+    public function addColumn($column, $existing_on_db = null): Index
     {
         if (!($column instanceof IndexColumn)) {
             $column = new IndexColumn($column, IndexColumn::ASC, null, $existing_on_db);
@@ -100,17 +115,21 @@ class Index extends DBTableComponent
     }
 
     /**
+     * gets columns
+     *
      * @return IndexColumn[]
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->columns;
     }
 
     /**
+     * gets sql query part
+     *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $output = $this->getType() ;
         $output .= ' ' . ($this->getType() == 'PRIMARY' ? ' KEY' : '') ;
@@ -123,7 +142,12 @@ class Index extends DBTableComponent
         return $output;
     }
 
-    public function showAlter()
+    /**
+     * gets alter query part
+     *
+     * @return string
+     */
+    public function showAlter(): string
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
             return 'DROP INDEX '.$this->getName() . ' ON '.$this->getTable()->getName().';';
@@ -136,5 +160,7 @@ class Index extends DBTableComponent
                 "DROP INDEX ".$this->getName() . " ON ".$this->getTable()->getName().";\n".
                 "CREATE " . $this->render();
         }
+
+        return "";
     }
 }

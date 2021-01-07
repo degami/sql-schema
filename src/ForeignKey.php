@@ -19,29 +19,33 @@ class ForeignKey extends DBTableComponent
     private $columns = [];
 
     /** @var string */
-    private $targetTable;
+    private $target_table;
 
     /** @var string[] */
-    private $targetColumns;
+    private $target_columns;
 
     /** @var string */
-    private $onUpdateAction = self::ACTION_RESTRICT;
+    private $on_update_action = self::ACTION_RESTRICT;
 
     /** @var string */
-    private $onDeleteAction = self::ACTION_RESTRICT;
+    private $on_delete_action = self::ACTION_RESTRICT;
 
     /**
-     * @param  string
-     * @param  Table
-     * @param  string[]|string
-     * @param  string
-     * @param  string[]|string
+     * ForeignKey constructor.
+     * @param string $name
+     * @param Table $table
+     * @param mixed $columns
+     * @param string $targetTable
+     * @param mixed $targetColumns
+     * @param string $onUpdateAction
+     * @param string $onDeleteAction
+     * @param bool $existing_on_db
      */
-    public function __construct($name, $table, $columns, $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT, $existing_on_db = false)
+    public function __construct(string $name, Table $table, $columns, string $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT, $existing_on_db = false)
     {
         $this->name = $name;
         $this->table = $table;
-        $this->targetTable = $targetTable;
+        $this->target_table = $targetTable;
 
         if (!is_array($columns)) {
             $columns = [$columns];
@@ -53,26 +57,30 @@ class ForeignKey extends DBTableComponent
             $targetColumns = [$targetColumns];
         }
 
-        $this->targetColumns = $targetColumns;
-        $this->onUpdateAction = $onUpdateAction;
-        $this->onDeleteAction = $onDeleteAction;
+        $this->target_columns = $targetColumns;
+        $this->on_update_action = $onUpdateAction;
+        $this->on_delete_action = $onDeleteAction;
 
         $this->isExistingOnDb(boolval($existing_on_db));
     }
 
     /**
+     * gets foreign key name
+     *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
+     * adds a column
+     *
      * @param  string
      * @return self
      */
-    public function addColumn($column)
+    public function addColumn($column): ForeignKey
     {
         $this->columns[] = $column;
         $this->isModified(true);
@@ -80,102 +88,124 @@ class ForeignKey extends DBTableComponent
     }
 
     /**
+     * gets columns
+     *
      * @return string[]
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->columns;
     }
 
     /**
+     * sets target table
+     *
      * @param  string
      * @return self
      */
-    public function setTargetTable($targetTable)
+    public function setTargetTable($target_table): ForeignKey
     {
-        $this->targetTable = $targetTable;
+        $this->target_table = $target_table;
         $this->isModified(true);
         return $this;
     }
 
     /**
+     * gets target table
+     *
      * @return string
      */
-    public function getTargetTable()
+    public function getTargetTable(): string
     {
-        return $this->targetTable;
+        return $this->target_table;
     }
 
     /**
-     * @param  string
+     * adds target column
+     *
+     * @param string $target_column
      * @return self
      */
-    public function addTargetColumn($targetColumn)
+    public function addTargetColumn(string $target_column): ForeignKey
     {
-        $this->targetColumns[] = $targetColumn;
+        $this->target_columns[] = $target_column;
         $this->isModified(true);
         return $this;
     }
 
     /**
+     * gets target columns
+     *
      * @return string[]
      */
-    public function getTargetColumns()
+    public function getTargetColumns(): array
     {
-        return $this->targetColumns;
+        return $this->target_columns;
     }
 
     /**
-     * @param  int
+     * sets on update action
+     *
+     * @param string $on_update_action
      * @return self
+     * @throws OutOfRangeException
      */
-    public function setOnUpdateAction($onUpdateAction)
+    public function setOnUpdateAction(string $on_update_action): ForeignKey
     {
-        if (!$this->validateAction($onUpdateAction)) {
-            throw new OutOfRangeException("Action '$onUpdateAction' is invalid.");
+        if (!$this->validateAction($on_update_action)) {
+            throw new OutOfRangeException("Action '$on_update_action' is invalid.");
         }
 
-        $this->onUpdateAction = $onUpdateAction;
+        $this->on_update_action = $on_update_action;
         $this->isModified(true);
         return $this;
     }
 
     /**
+     * gets on update action
+     *
      * @return string
      */
-    public function getOnUpdateAction()
+    public function getOnUpdateAction(): string
     {
-        return $this->onUpdateAction;
+        return $this->on_update_action;
     }
 
     /**
-     * @param  int
+     * sets on delete action
+     *
+     * @param string $on_delete_action
      * @return self
+     * @throws OutOfRangeException
      */
-    public function setOnDeleteAction($onDeleteAction)
+    public function setOnDeleteAction(string $on_delete_action): ForeignKey
     {
-        if (!$this->validateAction($onDeleteAction)) {
-            throw new OutOfRangeException("Action '$onDeleteAction' is invalid.");
+        if (!$this->validateAction($on_delete_action)) {
+            throw new OutOfRangeException("Action '$on_delete_action' is invalid.");
         }
 
-        $this->onDeleteAction = $onDeleteAction;
+        $this->on_delete_action = $on_delete_action;
         $this->isModified(true);
         return $this;
     }
 
     /**
+     * gets on delete action
+     *
      * @return string
      */
-    public function getOnDeleteAction()
+    public function getOnDeleteAction(): string
     {
-        return $this->onDeleteAction;
+        return $this->on_delete_action;
     }
 
     /**
-     * @param  string
+     * validate action
+     *
+     * @param string $action
      * @return bool
      */
-    private function validateAction($action)
+    private function validateAction(string $action): bool
     {
         return $action === self::ACTION_RESTRICT
         || $action === self::ACTION_NO_ACTION
@@ -184,9 +214,11 @@ class ForeignKey extends DBTableComponent
     }
 
     /**
+     * gets sql query part
+     *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $output = 'CONSTRAINT ' . $this->getName() . ' FOREIGN KEY';
         $output .= ' ('. implode(', ', $this->getColumns()) .')';
@@ -202,7 +234,12 @@ class ForeignKey extends DBTableComponent
         return $output;
     }
 
-    public function showAlter()
+    /**
+     * gets alter query part
+     *
+     * @return string
+     */
+    public function showAlter(): string
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
             return 'ALTER TABLE '.$this->getTable()->getName() . ' DROP FOREIGN KEY ' . $this->getName() . ';';
@@ -213,5 +250,7 @@ class ForeignKey extends DBTableComponent
                 "ALTER TABLE ".$this->getTable()->getName() . " DROP FOREIGN KEY " . $this->getName() . ";\n".
                 "ALTER TABLE ".$this->getTable()->getName() . " ADD ". $this->render();
         }
+
+        return "";
     }
 }

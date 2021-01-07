@@ -6,6 +6,7 @@ use Degami\SqlSchema\Exceptions\DuplicateException;
 use Degami\SqlSchema\Exceptions\EmptyException;
 use Degami\SqlSchema\Exceptions\OutOfRangeException;
 use Degami\SqlSchema\Abstracts\DBComponent;
+use PDO;
 
 class Table extends DBComponent
 {
@@ -45,50 +46,57 @@ class Table extends DBComponent
     private $storageEngine = null;
 
     /**
-     * @param string
+     * Table constructor.
+     *
+     * @param string $name
+     * @param bool $existing_on_db
      */
-    public function __construct($name, $existing_on_db = false)
+    public function __construct(string $name, $existing_on_db = false)
     {
         $this->name = $name;
         $this->isExistingOnDb(boolval($existing_on_db));
     }
 
     /**
-     * get Name
+     * get table name
+     *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * set Comment
+     * sets table comment
+     *
      * @param string $comment
      * @return  self
      */
-    public function setComment($comment)
+    public function setComment(string $comment): Table
     {
         $this->comment = $comment;
         return $this;
     }
 
     /**
-     * get Comment
+     * gets table comment
+     *
      * @return string
      */
-    public function getComment()
+    public function getComment(): ?string
     {
         return $this->comment;
     }
 
     /**
-     * set Option
+     * sets table option
+     *
      * @param string $name
      * @param string $value
      * @return self
      */
-    public function setOption($name, $value)
+    public function setOption(string $name, string $value): Table
     {
         $this->options[$name] = $value;
         $this->isModified(true);
@@ -96,28 +104,32 @@ class Table extends DBComponent
     }
 
     /**
-     * get Options
+     * gets table options
+     *
      * @return array
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->options;
     }
 
     /**
+     * gets table storage engine
+     *
      * @return string storage engine
      */
-    public function getStorageEngine()
+    public function getStorageEngine(): ?string
     {
         return $this->storageEngine;
     }
 
     /**
-     * @param string storage engine $storageEngine
+     * sets table storage engine
      *
+     * @param string storage engine $storageEngine
      * @return self
      */
-    public function setStorageEngine($storageEngine)
+    public function setStorageEngine($storageEngine): Table
     {
         $this->storageEngine = $storageEngine;
         $this->isModified(true);
@@ -125,16 +137,20 @@ class Table extends DBComponent
     }
 
     /**
-     * add Column
+     * add a column
+     *
      * @param string $name
-     * @param string $type
+     * @param string|null $type
      * @param mixed $parameters
      * @param array $options
      * @param boolean $nullable
      * @param mixed $default
+     * @param bool $existing_on_db
      * @return self
+     * @throws DuplicateException
+     * @throws OutOfRangeException
      */
-    public function addColumn($name, $type = null, $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
+    public function addColumn(string $name, $type = null, $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false): Table
     {
         $column = null;
 
@@ -157,14 +173,14 @@ class Table extends DBComponent
     }
 
     /**
-     * moves a Column after another
+     * moves a column after another
      *
-     * @param $name
-     * @param $after
-     * @return $this
+     * @param string $name
+     * @param string $after
+     * @return self
      * @throws OutOfRangeException
      */
-    public function moveColumn($name, $after)
+    public function moveColumn(string $name, string $after): Table
     {
         if ($this->getColumn($name) && $this->getColumn($after)) {
             $this->getColumn($name)->setColumnPosition($after)->isModified(true);
@@ -173,25 +189,27 @@ class Table extends DBComponent
         return $this;
     }
 
-   /**
-    * deletes Column
-    * @param  string $name
-    * @return self
-    */
-    public function deleteColumn($name)
+    /**
+     * deletes a column
+     *
+     * @param string $name
+     * @return self
+     * @throws OutOfRangeException
+     */
+    public function deleteColumn(string $name): Table
     {
         $this->getColumn($name)->isDeleted(true);
         return $this;
     }
 
     /**
-     * get Column
+     * gets a column
      *
-     * @param $name
+     * @param string $name
      * @return Column|null
      * @throws OutOfRangeException
      */
-    public function getColumn($name)
+    public function getColumn(string $name): ?Column
     {
         if (isset($this->columns[$name])) {
             return $this->columns[$name];
@@ -201,21 +219,26 @@ class Table extends DBComponent
     }
 
     /**
-     * get Columns
+     * gets table columns
+     *
      * @return Column[]
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->columns;
     }
 
-   /**
-    * add Index
-    * @param string|Index $name
-    * @param array  $Columns
-    * @param string $type
-    */
-    public function addIndex($name, $columns = [], $type = Index::TYPE_INDEX, $existing_on_db = false)
+    /**
+     * add an index
+     *
+     * @param string|Index $name
+     * @param array $columns
+     * @param string $type
+     * @param bool $existing_on_db
+     * @return self
+     * @throws DuplicateException
+     */
+    public function addIndex($name, $columns = [], $type = Index::TYPE_INDEX, $existing_on_db = false): Table
     {
         $index = null;
 
@@ -238,12 +261,14 @@ class Table extends DBComponent
         return $this;
     }
 
-   /**
-    * get Index
-    * @param  string $name
-    * @return Index|null
-    */
-    public function getIndex($name)
+    /**
+     * gets an index
+     *
+     * @param string $name
+     * @return Index|null
+     * @throws OutOfRangeException
+     */
+    public function getIndex(string $name): ?Index
     {
         if (isset($this->indexes[$name])) {
             return $this->indexes[$name];
@@ -252,54 +277,66 @@ class Table extends DBComponent
         throw new OutOfRangeException("Index not found");
     }
 
-   /**
-    * deletes Index
-    * @param  string $name
-    * @return self
-    */
-    public function deleteIndex($name)
+    /**
+     * deletes an index
+     *
+     * @param string $name
+     * @return self
+     * @throws OutOfRangeException
+     */
+    public function deleteIndex(string $name): Table
     {
         $this->getIndex($name)->isDeleted(true);
         return $this;
     }
 
    /**
-    * get Indexes
+    * get indexes
+    *
     * @return Index[]
     */
-    public function getIndexes()
+    public function getIndexes(): array
     {
         return $this->indexes;
     }
 
     /**
-     * set AutoIncrement Column
-     * @param string $columnName
+     * set autoIncrement on a column
+     *
+     * @param string $column_name
+     * @param bool $set_modified
      * @return self
+     * @throws EmptyException
+     * @throws OutOfRangeException
      */
-    public function setAutoIncrementColumn($columnName, $set_modified = true)
+    public function setAutoIncrementColumn(string $column_name, $set_modified = true): Table
     {
-        if ($this->getColumn($columnName) == null) {
+        if ($this->getColumn($column_name) == null) {
             throw new EmptyException("Column not found", 1);
         }
-        foreach ($this->getColumns() as $key => &$colum) {
-            $colum->setAutoIncrement(false, $set_modified);
+        foreach ($this->getColumns() as $key => &$column) {
+            $column->setAutoIncrement(false, $set_modified);
         }
-        $this->getColumn($columnName)->setAutoIncrement(true, $set_modified);
+        $this->getColumn($column_name)->setAutoIncrement(true, $set_modified);
         $this->isModified($set_modified);
 
         return $this;
     }
 
-   /**
-    * add Foreign Key
-    * @param string|ForeignKey $name
-    * @param array  $columns
-    * @param string $targetTable
-    * @param array  $targetColumns
-    * @return self
-    */
-    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT, $existing_on_db = false)
+    /**
+     * adds a foreign key
+     *
+     * @param string|ForeignKey $name
+     * @param array $columns
+     * @param null $targetTable
+     * @param array $targetColumns
+     * @param string $onUpdateAction
+     * @param string $onDeleteAction
+     * @param bool $existing_on_db
+     * @return self
+     * @throws DuplicateException
+     */
+    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT, $existing_on_db = false): Table
     {
         $foreignKey = null;
 
@@ -321,10 +358,12 @@ class Table extends DBComponent
     }
 
     /**
-    * @param  string
-    * @return ForeignKey|NULL
-    */
-    public function getForeignKey($name)
+     * gets a foreign key
+     *
+     * @param string $name
+     * @return ForeignKey|NULL
+     */
+    public function getForeignKey(string $name): ?ForeignKey
     {
         if (isset($this->foreignKeys[$name])) {
             return $this->foreignKeys[$name];
@@ -332,22 +371,24 @@ class Table extends DBComponent
         return null;
     }
 
-   /**
-    * deletes Foreign Key
-    * @param  string $name
-    * @return self
-    */
-    public function deleteForeignKey($name)
+    /**
+     * deletes a foreign key
+     *
+     * @param string $name
+     * @return self
+     */
+    public function deleteForeignKey(string $name): Table
     {
         $this->getForeignKey($name)->isDeleted(true);
         return $this;
     }
 
    /**
-    * get Foreign Keys
+    * gets foreign keys
+    *
     * @return ForeignKey[]
     */
-    public function getForeignKeys()
+    public function getForeignKeys(): array
     {
         return $this->foreignKeys;
     }
@@ -379,11 +420,11 @@ class Table extends DBComponent
     }
 
    /**
-    * show Create
+    * shows create table sql query
     *
     * @return string
     */
-    public function showCreate()
+    public function showCreate(): string
     {
         $out = "CREATE TABLE `" . $this->getName() . "` (\n";
         $columns = [];
@@ -428,7 +469,7 @@ class Table extends DBComponent
      *
      * @return string
      */
-    public function showDrop()
+    public function showDrop(): string
     {
         return "DROP TABLE ".$this->getName().";";
     }
@@ -438,7 +479,7 @@ class Table extends DBComponent
      *
      * @return string
      */
-    public function migrate()
+    public function migrate(): string
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
             return $this->showDrop();
@@ -454,7 +495,7 @@ class Table extends DBComponent
      *
      * @return string
      */
-    public function showAlter()
+    public function showAlter(): string
     {
         $columns = [];
         foreach ($this->getColumns() as $key => $column) {
@@ -499,19 +540,20 @@ class Table extends DBComponent
     /**
      * read table structure from db
      *
-     * @param $dbname
-     * @param $tablename
-     * @param $pdo
-     * @return static
+     * @param string $db_name
+     * @param string $table_name
+     * @param PDO $pdo
+     * @return self
      * @throws DuplicateException
      * @throws EmptyException
+     * @throws OutOfRangeException
      */
-    public static function readFromExisting($dbname, $tablename, $pdo)
+    public static function readFromExisting(string $db_name, string $table_name, PDO $pdo): Table
     {
         $sql_queries = [
-            'create' => "SHOW CREATE TABLE {$dbname}.{$tablename}",
-            'fields' => "DESCRIBE {$dbname}.{$tablename}",
-            //'index' => "SHOW INDEX FROM {$dbname}.{$tablename}",
+            'create' => "SHOW CREATE TABLE {$db_name}.{$table_name}",
+            'fields' => "DESCRIBE {$db_name}.{$table_name}",
+            //'index' => "SHOW INDEX FROM {$dbname}.{$table_name}",
 
             'index' => "SELECT
                 tc.CONSTRAINT_NAME,
@@ -522,7 +564,7 @@ class Table extends DBComponent
                 tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME AND
                 kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA AND kcu.TABLE_NAME = tc.TABLE_NAME
                 )
-                WHERE tc.TABLE_SCHEMA = '{$dbname}' AND tc.`TABLE_NAME` LIKE '{$tablename}'
+                WHERE tc.TABLE_SCHEMA = '{$db_name}' AND tc.`TABLE_NAME` LIKE '{$table_name}'
                 GROUP BY tc.CONSTRAINT_NAME, tc.CONSTRAINT_TYPE",
             'refs' => "SELECT
                 kcu.TABLE_NAME,
@@ -537,7 +579,7 @@ class Table extends DBComponent
                 rc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME AND
                 kcu.TABLE_SCHEMA = rc.UNIQUE_CONSTRAINT_SCHEMA AND kcu.TABLE_NAME = rc.TABLE_NAME
                 )
-                WHERE kcu.REFERENCED_TABLE_SCHEMA = '{$dbname}' AND kcu.TABLE_NAME = '{$tablename}'
+                WHERE kcu.REFERENCED_TABLE_SCHEMA = '{$db_name}' AND kcu.TABLE_NAME = '{$table_name}'
                 GROUP BY kcu.CONSTRAINT_NAME, kcu.REFERENCED_TABLE_NAME, rc.UPDATE_RULE, rc.DELETE_RULE",
         ];
 
@@ -546,10 +588,10 @@ class Table extends DBComponent
         foreach ($sql_queries as $index => $sql) {
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
-            $info[$index] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $info[$index] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        $table = new static($tablename, true);
+        $table = new static($table_name, true);
 
         foreach ($info['fields'] as $field) {
             $name = $field['Field'];
@@ -618,11 +660,12 @@ class Table extends DBComponent
      * add primary key helper function
      *
      * @param $name
-     * @return $this
+     * @return self
      * @throws DuplicateException
      * @throws EmptyException
+     * @throws OutOfRangeException
      */
-    public function addPrimaryKey($name)
+    public function addPrimaryKey($name): Table
     {
         $this
             ->addColumn($name, Column::TYPE_INT, null, [Column::OPTION_UNSIGNED], false)
@@ -639,8 +682,9 @@ class Table extends DBComponent
      * @param $length
      * @return $this
      * @throws DuplicateException
+     * @throws OutOfRangeException
      */
-    public function addVarcharCol($name, $length)
+    public function addVarcharCol($name, $length): Table
     {
         $this->addColumn($name, Column::TYPE_VARCHAR, [$length]);
 
@@ -654,8 +698,9 @@ class Table extends DBComponent
      * @param bool $unsigned
      * @return $this
      * @throws DuplicateException
+     * @throws OutOfRangeException
      */
-    public function addIntCol($name, $unsigned = true)
+    public function addIntCol($name, $unsigned = true): Table
     {
         $options = null;
         if ($unsigned == true) {
@@ -673,8 +718,9 @@ class Table extends DBComponent
      * @param $name
      * @return $this
      * @throws DuplicateException
+     * @throws OutOfRangeException
      */
-    public function addTextCol($name)
+    public function addTextCol($name): Table
     {
         $this->addColumn($name, Column::TYPE_TEXT, null);
 
@@ -687,8 +733,9 @@ class Table extends DBComponent
      * @param $name
      * @return $this
      * @throws DuplicateException
+     * @throws OutOfRangeException
      */
-    public function addTimestampCol($name)
+    public function addTimestampCol($name): Table
     {
         $this->addColumn($name, 'TIMESTAMP', null, [], false, 'CURRENT_TIMESTAMP()');
 

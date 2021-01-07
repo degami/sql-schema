@@ -20,11 +20,14 @@ class IndexColumn extends DBComponent
     private $length;
 
     /**
-     * @param  string
-     * @param  string
-     * @param  int|NULL
+     * IndexColumn constructor.
+     *
+     * @param string $name
+     * @param string $order
+     * @param null $length
+     * @param bool $existing_on_db
      */
-    public function __construct($name, $order = self::ASC, $length = null, $existing_on_db = false)
+    public function __construct(string $name, $order = self::ASC, $length = null, $existing_on_db = false)
     {
         $this->name = $name;
         $this->order = $order;
@@ -33,10 +36,12 @@ class IndexColumn extends DBComponent
     }
 
     /**
-     * @param  string
+     * sets index name
+     *
+     * @param string $name
      * @return self
      */
-    public function setName($name)
+    public function setName(string $name): IndexColumn
     {
         $this->name = $name;
         $this->isModified(true);
@@ -44,18 +49,23 @@ class IndexColumn extends DBComponent
     }
 
     /**
+     * gets index name
+     *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @param  string
+     * sets order
+     *
+     * @param string $order
      * @return self
+     * @throws OutOfRangeException
      */
-    public function setOrder($order)
+    public function setOrder(string $order): IndexColumn
     {
         $order = (string) $order;
 
@@ -69,18 +79,22 @@ class IndexColumn extends DBComponent
     }
 
     /**
+     * gets order
+     *
      * @return string
      */
-    public function getOrder()
+    public function getOrder(): string
     {
         return $this->order;
     }
 
     /**
-     * @param  int|NULL
+     * sets length
+     *
+     * @param int|NULL $length
      * @return self
      */
-    public function setLength($length)
+    public function setLength(?int $length): IndexColumn
     {
         $this->length = $length;
         $this->isModified(true);
@@ -88,17 +102,21 @@ class IndexColumn extends DBComponent
     }
 
     /**
+     * gets length
+     *
      * @return int|NULL
      */
-    public function getLength()
+    public function getLength(): ?int
     {
         return $this->length;
     }
 
     /**
+     * gets sql query part
+     *
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $output = '`'.$this->getName().'` ';
         $length = $this->getLength();
