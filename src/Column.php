@@ -470,7 +470,7 @@ class Column extends DBTableComponent
         $output .= ($this->isNullable() === false ? ' NOT NULL' : ' NULL');
         $output .= ($this->getDefaultValue() != null ? ' DEFAULT '.$this->getDefaultValue() : '');
         $output .= ($this->isAutoIncrement() == true ? ' AUTO_INCREMENT' : '');
-        $output .= (trim($this->getComment()) != '' ? ' COMMENT \''.$this->getComment().'\'' : '');
+        $output .= (trim((string) $this->getComment()) != '' ? ' COMMENT \''.$this->getComment().'\'' : '');
 
         return $output;
     }
