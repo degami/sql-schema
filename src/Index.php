@@ -150,14 +150,14 @@ class Index extends DBTableComponent
     public function showAlter(): string
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
-            return 'DROP INDEX '.$this->getName() . ' ON '.$this->getTable()->getName().';';
+            return 'DROP INDEX `'.$this->getName() . '` ON '.$this->getTable()->getName().';';
         } else if (!$this->isExistingOnDb()) {
             if ($this->getType() != 'PRIMARY') {
                 return "CREATE " . $this->render();
             }
         } else if ($this->isModified() && $this->getType() != 'PRIMARY') {
             return
-                "DROP INDEX ".$this->getName() . " ON ".$this->getTable()->getName().";\n".
+                "DROP INDEX `".$this->getName() . "` ON ".$this->getTable()->getName().";\n".
                 "CREATE " . $this->render();
         }
 

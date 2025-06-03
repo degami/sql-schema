@@ -220,10 +220,10 @@ class ForeignKey extends DBTableComponent
      */
     public function render(): string
     {
-        $output = 'CONSTRAINT ' . $this->getName() . ' FOREIGN KEY';
-        $output .= ' ('. implode(', ', $this->getColumns()) .')';
-        $output .= ' REFERENCES ' . $this->getTargetTable() . ' ';
-        $output .= '('. implode(', ', $this->getTargetColumns()) .')';
+        $output = 'CONSTRAINT `' . $this->getName() . '` FOREIGN KEY';
+        $output .= ' (`'. implode('`, `', $this->getColumns()) .'`)';
+        $output .= ' REFERENCES `' . $this->getTargetTable() . '` ';
+        $output .= '(`'. implode('`, `', $this->getTargetColumns()) .'`)';
 
         if ($this->getOnUpdateAction()) {
             $output .= ' ON UPDATE ' . $this->getOnUpdateAction() . ' ';
@@ -242,13 +242,13 @@ class ForeignKey extends DBTableComponent
     public function showAlter(): string
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
-            return 'ALTER TABLE '.$this->getTable()->getName() . ' DROP FOREIGN KEY ' . $this->getName() . ';';
+            return 'ALTER TABLE `'.$this->getTable()->getName() . '` DROP FOREIGN KEY `' . $this->getName() . '`;';
         } else if (!$this->isExistingOnDb()) {
-            return 'ALTER TABLE '.$this->getTable()->getName() . ' ADD '. $this->render();
+            return 'ALTER TABLE `'.$this->getTable()->getName() . '` ADD '. $this->render();
         } else if ($this->isModified()) {
             return
-                "ALTER TABLE ".$this->getTable()->getName() . " DROP FOREIGN KEY " . $this->getName() . ";\n".
-                "ALTER TABLE ".$this->getTable()->getName() . " ADD ". $this->render();
+                "ALTER TABLE `".$this->getTable()->getName() . "` DROP FOREIGN KEY `" . $this->getName() . "`;\n".
+                "ALTER TABLE `".$this->getTable()->getName() . "` ADD ". $this->render();
         }
 
         return "";

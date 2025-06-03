@@ -483,7 +483,7 @@ class Column extends DBTableComponent
     public function showAlter(): string
     {
         if ($this->isExistingOnDb() && $this->isDeleted()) {
-            return "DROP COLUMN ".$this->getName();
+            return "DROP COLUMN `".$this->getName()."`";
         } else if (!$this->isExistingOnDb()) {
             return "ADD ".$this->render() . $this->getColumnPosition();
         } else if ($this->isModified()) {

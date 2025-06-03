@@ -328,7 +328,7 @@ class Table extends DBComponent
      *
      * @param string|ForeignKey $name
      * @param array $columns
-     * @param null $targetTable
+     * @param string $targetTable
      * @param array $targetColumns
      * @param string $onUpdateAction
      * @param string $onDeleteAction
@@ -336,7 +336,7 @@ class Table extends DBComponent
      * @return self
      * @throws DuplicateException
      */
-    public function addForeignKey($name, $columns = [], $targetTable = null, $targetColumns = [], $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT, $existing_on_db = false): Table
+    public function addForeignKey(string $name, array $columns, string $targetTable, array $targetColumns, $onUpdateAction = ForeignKey::ACTION_RESTRICT, $onDeleteAction = ForeignKey::ACTION_RESTRICT, $existing_on_db = false): Table
     {
         $foreignKey = null;
 
