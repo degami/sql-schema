@@ -14,9 +14,6 @@ class Schema
     /** @var array  [name => Table] */
     private $tables = [];
 
-    /** @var PDO|null */
-    private $pdo;
-
     /**
      * Schema constructor.
      *
@@ -26,10 +23,8 @@ class Schema
      * @throws Exceptions\EmptyException
      * @throws OutOfRangeException
      */
-    public function __construct($pdo = null, $preload = false)
+    public function __construct(protected ?PDO $pdo = null, $preload = false)
     {
-        $this->pdo = $pdo;
-
         $this->init($preload);
     }
 
@@ -112,7 +107,7 @@ class Schema
             $table = $name;
             $name = $table->getName();
         } else {
-            $table = new Table($name);
+            $table = new Table($name, $this->getName(), $this->pdo);
         }
 
         if (isset($this->tables[$name])) {

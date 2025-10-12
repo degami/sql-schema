@@ -11,11 +11,6 @@ use PDO;
 class Table extends DBComponent
 {
     /**
-     * @var string
-     */
-    private $name;
-
-    /**
      * @var string|NULL
      */
     private $comment;
@@ -51,9 +46,8 @@ class Table extends DBComponent
      * @param string $name
      * @param bool $existing_on_db
      */
-    public function __construct(string $name, $existing_on_db = false)
+    public function __construct(protected string $name, protected string $schema_name, protected ?PDO $pdo = null, $existing_on_db = false)
     {
-        $this->name = $name;
         $this->isExistingOnDb(boolval($existing_on_db));
     }
 
@@ -65,6 +59,26 @@ class Table extends DBComponent
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * get schema name
+     * 
+     * @return string
+     */
+    public function getSchemaName(): string
+    {
+        return $this->schema_name;
+    }
+
+    /**
+     * get table full name
+     *
+     * @return string
+     */
+    public function getFullName(): string
+    {
+        return $this->schema_name . '.' . $this->name;
     }
 
     /**
@@ -591,7 +605,7 @@ class Table extends DBComponent
             $info[$index] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        $table = new static($table_name, true);
+        $table = new static($table_name, $db_name, $pdo, true);
 
         foreach ($info['fields'] as $field) {
             $name = $field['Field'];
@@ -740,5 +754,35 @@ class Table extends DBComponent
         $this->addColumn($name, 'TIMESTAMP', null, [], false, 'CURRENT_TIMESTAMP()');
 
         return $this;
+    }
+
+    /*+
+     * counts rows in table
+     *
+     * @return int
+     */
+    public function countRows(): int
+    {
+        if ($this->pdo instanceof PDO) {
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM `{$this->getName()}`");
+            $stmt->execute();
+            return (int)$stmt->fetchColumn();
+        }
+        return 0;
+    }
+
+    /**
+     * gets table size in bytes
+     * 
+     * @return int
+     */
+    public function getSizeInBytes(): int
+    {
+        if ($this->pdo instanceof PDO) {
+            $stmt = $this->pdo->prepare("SELECT DATA_LENGTH + INDEX_LENGTH AS size FROM information_schema.TABLES WHERE TABLE_SCHEMA = :schema_name AND TABLE_NAME = :table_name");
+            $stmt->execute(['schema_name' => $this->getSchemaName(), 'table_name' => $this->getName()]);
+            return (int)$stmt->fetchColumn();
+        }
+        return 0;
     }
 }

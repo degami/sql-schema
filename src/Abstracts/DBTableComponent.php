@@ -7,7 +7,7 @@ use Degami\SqlSchema\Table;
 abstract class DBTableComponent extends DBComponent
 {
     /** @var Table */
-    protected $table;
+    protected Table $table;
 
 
     public function getTable(): Table

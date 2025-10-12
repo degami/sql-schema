@@ -10,15 +10,6 @@ class IndexColumn extends DBComponent
     const ASC = 'ASC';
     const DESC = 'DESC';
 
-    /** @var string */
-    private $name;
-
-    /** @var string */
-    private $order;
-
-    /** @var int|NULL */
-    private $length;
-
     /**
      * IndexColumn constructor.
      *
@@ -27,11 +18,8 @@ class IndexColumn extends DBComponent
      * @param null $length
      * @param bool $existing_on_db
      */
-    public function __construct(string $name, $order = self::ASC, $length = null, $existing_on_db = false)
+    public function __construct(protected string $name, protected string $order = self::ASC, protected ?int $length = null, $existing_on_db = false)
     {
-        $this->name = $name;
-        $this->order = $order;
-        $this->length = $length;
         $this->isExistingOnDb(boolval($existing_on_db));
     }
 

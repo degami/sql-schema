@@ -85,26 +85,8 @@ class Column extends DBTableComponent
         ],
     ];
 
-    /** @var string */
-    private $name;
-
-    /** @var string */
-    private $type;
-
-    /** @var array */
-    private $parameters = [];
-
-    /** @var array */
-    private $options = [];
-
-    /** @var bool */
-    private $nullable = true;
-
     /** @var bool */
     private $auto_increment = false;
-
-    /** @var mixed|NULL */
-    private $default_value;
 
     /** @var string|NULL */
     private $comment;
@@ -125,24 +107,25 @@ class Column extends DBTableComponent
      * @param false $existing_on_db
      * @throws OutOfRangeException
      */
-    public function __construct(string $name, Table $table, string $type, array $parameters = null, array $options = [], $nullable = true, $default = null, $existing_on_db = false)
-    {
-        $this->name = $name;
-        $this->table = $table;
-
+    public function __construct(
+        protected string $name, 
+        protected Table $table, 
+        protected string $type, 
+        protected ?array $parameters = null, 
+        protected array $options = [], 
+        protected bool $nullable = true, 
+        protected mixed $default_value = null, 
+        $existing_on_db = false
+    ) {
         if (!$this->validateType($type)) {
             throw new OutOfRangeException("Invalid type `{$type}` for column `{$name}`");
         }
 
-        $this->type = $type;
-
         if ($parameters === null) {
-            $parameters = [];
+            $this->parameters = [];
         } elseif (!is_array($parameters)) {
-            $parameters = [$parameters];
+            $this->parameters = [$parameters];
         }
-
-        $this->parameters = $parameters;
 
         if (isset($options['first']) && $options['first'] == true) {
             $this->setColumnPosition(self::POSITION_FIRST);
@@ -163,6 +146,8 @@ class Column extends DBTableComponent
             unset($options['comment']);
         }
 
+        // reset current options as they will be re-added
+        $this->options = [];
         foreach ($options as $k => $v) {
             if (is_int($k)) {
                 $this->options[$v] = null;
@@ -170,9 +155,6 @@ class Column extends DBTableComponent
                 $this->options[$k] = $v;
             }
         }
-
-        $this->nullable = $nullable;
-        $this->default_value = $default;
 
         $this->isExistingOnDb(boolval($existing_on_db));
     }

@@ -12,31 +12,17 @@ class Index extends DBTableComponent
     const TYPE_UNIQUE = 'UNIQUE';
     const TYPE_FULLTEXT = 'FULLTEXT';
 
-    /** @var string */
-    private $name;
-
-    /** @var string */
-    private $type;
-
-    /** @var IndexColumn[] */
-    private $columns = [];
-
-
     /**
      * Index constructor.
      *
      * @param string|null $name
      * @param Table $table
-     * @param array $columns
+     * @param IndexColumn[] $columns
      * @param string $type
      * @param false $existing_on_db
      */
-    public function __construct(?string $name, Table $table, $columns = [], $type = self::TYPE_INDEX, $existing_on_db = false)
+    public function __construct(protected ?string $name, protected Table $table, protected array|string $columns = [], protected string $type = self::TYPE_INDEX, $existing_on_db = false)
     {
-        $this->name = $name;
-        $this->table = $table;
-        $this->type = $type;
-
         if (!is_array($columns)) {
             $columns = [$columns];
         }

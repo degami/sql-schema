@@ -12,24 +12,6 @@ class ForeignKey extends DBTableComponent
     const ACTION_CASCADE = 'CASCADE';
     const ACTION_SET_NULL = 'SET NULL';
 
-    /** @var string */
-    private $name;
-
-    /** @var string[] */
-    private $columns = [];
-
-    /** @var string */
-    private $target_table;
-
-    /** @var string[] */
-    private $target_columns;
-
-    /** @var string */
-    private $on_update_action = self::ACTION_RESTRICT;
-
-    /** @var string */
-    private $on_delete_action = self::ACTION_RESTRICT;
-
     /**
      * ForeignKey constructor.
      * @param string $name
@@ -41,26 +23,16 @@ class ForeignKey extends DBTableComponent
      * @param string $onDeleteAction
      * @param bool $existing_on_db
      */
-    public function __construct(string $name, Table $table, $columns, string $targetTable, $targetColumns, $onUpdateAction = self::ACTION_RESTRICT, $onDeleteAction = self::ACTION_RESTRICT, $existing_on_db = false)
-    {
-        $this->name = $name;
-        $this->table = $table;
-        $this->target_table = $targetTable;
-
-        if (!is_array($columns)) {
-            $columns = [$columns];
-        }
-
-        $this->columns = $columns;
-
-        if (!is_array($targetColumns)) {
-            $targetColumns = [$targetColumns];
-        }
-
-        $this->target_columns = $targetColumns;
-        $this->on_update_action = $onUpdateAction;
-        $this->on_delete_action = $onDeleteAction;
-
+    public function __construct(
+        protected string $name, 
+        protected Table $table, 
+        protected array $columns, 
+        protected string $target_table, 
+        protected array $target_columns, 
+        protected string $on_update_action = self::ACTION_RESTRICT, 
+        protected string $on_delete_action = self::ACTION_RESTRICT, 
+        $existing_on_db = false
+    ) {
         $this->isExistingOnDb(boolval($existing_on_db));
     }
 

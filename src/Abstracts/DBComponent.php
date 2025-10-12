@@ -5,14 +5,13 @@ namespace Degami\SqlSchema\Abstracts;
 abstract class DBComponent
 {
     /** @var boolean */
-    protected $existing_on_db = false;
+    protected bool $existing_on_db = false;
 
     /** @var boolean */
-    protected $modified = false;
+    protected bool $modified = false;
 
     /** @var boolean */
-    protected $deleted = false;
-
+    protected bool $deleted = false;
 
     /**
      * get/sets is existing on db flag
@@ -20,7 +19,7 @@ abstract class DBComponent
      * @param  boolean|null
      * @return boolean
      */
-    public function isExistingOnDb($existing_on_db = null): bool
+    public function isExistingOnDb(?bool $existing_on_db = null): bool
     {
         if ($existing_on_db !== null) {
             $this->existing_on_db = $existing_on_db;
@@ -35,7 +34,7 @@ abstract class DBComponent
      * @param  boolean|null
      * @return boolean
      */
-    public function isModified($modified = null): bool
+    public function isModified(?bool $modified = null): bool
     {
         if ($modified !== null) {
             $this->modified = $modified;
@@ -50,7 +49,7 @@ abstract class DBComponent
      * @param  boolean|null
      * @return boolean
      */
-    public function isDeleted($deleted = null): bool
+    public function isDeleted(?bool $deleted = null): bool
     {
         if ($deleted !== null) {
             $this->deleted = $deleted;
