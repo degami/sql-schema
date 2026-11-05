@@ -264,14 +264,17 @@ class Table extends DBComponent
             $name = $index->getName();
         }
 
-        if (isset($this->indexes[$name])) {
-            throw new DuplicateException("Index '$name' in table '{$this->getName()}' already exists.");
+        if ($name != null) {
+            if (isset($this->indexes[$name])) {
+                throw new DuplicateException("Index '$name' in table '{$this->getName()}' already exists.");
+            }
+
+            $this->indexes[$name] = $index;
+            if (!$existing_on_db) {
+                $this->isModified(true);
+            }
         }
 
-        $this->indexes[$name] = $index;
-        if (!$existing_on_db) {
-            $this->isModified(true);
-        }
         return $this;
     }
 
